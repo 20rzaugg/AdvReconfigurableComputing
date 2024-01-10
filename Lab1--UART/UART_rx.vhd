@@ -121,6 +121,7 @@ begin
                         oversample_reg <= oversample_reg;
                     end if;
                 end if;
+            -- No parity bit
             -------------------------------------------------------------------
             -- STOP state, wait 8 clocks to sample stop bit
             -------------------------------------------------------------------
