@@ -6,12 +6,11 @@ set_global_assignment -name FAMILY "MAX 10 FPGA"
 set_global_assignment -name DEVICE 10M50DAF484C7G
 set_global_assignment -name TOP_LEVEL_ENTITY "UART"
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "16.0.0"
-set_global_assignment -name LAST_QUARTUS_VERSION "16.0.0"
+set_global_assignment -name LAST_QUARTUS_VERSION "20.1.1 Lite Edition"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "13:24:35 JANUARY 09,2024"
 set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT 484
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 7
-set_global_assignment -name SDC_FILE UART.SDC
 
 #============================================================
 # CLOCK
@@ -103,3 +102,12 @@ set_location_assignment PIN_AA2 -to GPIO[35]
 # End of pin assignments by Terasic System Builder
 #============================================================
 
+
+set_global_assignment -name SDC_FILE UART.sdc
+set_global_assignment -name VHDL_FILE UART_tx.vhd
+set_global_assignment -name VHDL_FILE UART_rx.vhd
+set_global_assignment -name VHDL_FILE UART.vhd
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"

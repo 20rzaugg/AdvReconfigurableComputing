@@ -95,7 +95,7 @@ begin
             -------------------------------------------------------------------
             -- DATA state, sample data 8 times per bit, majority rules
             -------------------------------------------------------------------
-            when data =>
+            when data => --TODO ignore edge samples
                 if oversample_count = 7 then
                     if bit_count = 7 then
                         next_state <= stop;

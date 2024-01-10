@@ -12,7 +12,7 @@ entity UART is
 end UART;
 
 architecture behavioral of UART is
-    
+    --TODO instantiate PLL with frequency 1.536 MHz ???
     component UART_RX is
         Port ( clk : in  STD_LOGIC;
                rst_l : in  STD_LOGIC;
