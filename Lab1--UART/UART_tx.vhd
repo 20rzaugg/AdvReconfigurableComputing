@@ -35,7 +35,7 @@ begin
         --Rising clock edge
         elsif rising_edge(clk) then
             --Count to 65 to get 19200 baud, oversampled by 8 (supposedly)
-            if clk_counter >= 65 then
+            if clk_counter >= 63 then
                 clk_counter <= 0;
                 state <= next_state;
                 oversample_count <= next_oversample_count;

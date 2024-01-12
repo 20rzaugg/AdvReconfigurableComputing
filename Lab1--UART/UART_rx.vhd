@@ -22,7 +22,7 @@ architecture Behavioral of UART_RX is
     signal bit_count : integer range 0 to 7 := 0; -- counts which bit we're on in the data state
     signal next_bit_count : integer range 0 to 7 := 0;
 
-    signal clk_counter : integer range 0 to 127 := 0;
+    signal clk_counter : integer range 0 to 7 := 0;
 
 begin
 
@@ -43,7 +43,7 @@ begin
         --Rising clock edge
         elsif rising_edge(clk) then
             --Count to 65 to get 19200 baud, oversampled by 8 (supposedly)
-            if clk_counter >= 65 then
+            if clk_counter = 7 then
                 clk_counter <= 0;
                 state <= next_state;
                 oversample_count <= next_oversample_count;
