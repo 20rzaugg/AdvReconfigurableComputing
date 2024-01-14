@@ -20,7 +20,7 @@ architecture behavioral of UART_TX is
     signal bit_count : integer range 0 to 7 := 0; -- counts which bit we're on in the data state
     signal next_bit_count : integer range 0 to 7 := 0;
 
-    signal tx_data_reg : std_logic_vector (7 downto 0) := 0; -- lock in TX data so the input signal can be changed during transmission
+    signal tx_data_reg : std_logic_vector (7 downto 0) := "00000000"; -- lock in TX data so the input signal can be changed during transmission
 
     signal clk_counter : integer range 0 to 127 := 0;
 

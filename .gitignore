@@ -1,0 +1,6 @@
+*.vhd.bak
+*.rpt
+*.map.summary
+*/db/
+*/greybox_tmp/
+*.db_info

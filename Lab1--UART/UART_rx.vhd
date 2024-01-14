@@ -137,8 +137,11 @@ begin
                     next_bit_count <= 0;
                     rx_done_reg <= '1';
                 end if;
-            when stop =>
-
+            when others =>
+					next_state <= idle;
+					next_oversample_count <= 0;
+					next_bit_count <= 0;
+					rx_done_reg <= '0';
         end case;
     end process;
 end Behavioral;

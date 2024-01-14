@@ -1,6 +1,6 @@
-DATE = "14:39:37 January 11, 2024"
+DATE = "10:22:51 January 14, 2024"
 QUARTUS_VERSION = "16.0.0"
 
 # Revisions
 
-PROJECT_REVISION = "uart"
+PROJECT_REVISION = "UART"
