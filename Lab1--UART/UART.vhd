@@ -11,7 +11,6 @@ entity UART is
         KEY : in std_logic_vector (1 downto 0);
         TX : out std_logic;
         RX : in std_logic
-        --GPIO : inout std_logic_vector(35 downto 0);
     );
 end UART;
 
@@ -32,21 +31,18 @@ architecture behavioral of UART is
     ---------------------------------------------------------------------------
     -- Dual Clock FIFO module
     ---------------------------------------------------------------------------
-    component dcfifo is
-        generic (
-          width : positive;
-          depth : positive -- in bits, (i.e. real_depth = 2 ** depth)
-        );
-        port ( 
-          wr : in std_logic;
-          wr_data : in std_logic_vector(width - 1 downto 0);
-          wr_clk : in std_logic;
-          wr_full : out std_logic;
-          rd : in std_logic;
-          rd_data : out std_logic_vector(width - 1 downto 0);
-          rd_clk : in std_logic;
-          rd_empty : out std_logic
-        );
+    component dcfifo2 IS
+	    port
+	    (
+	    	data		: IN STD_LOGIC_VECTOR (7 DOWNTO 0);
+	    	rdclk		: IN STD_LOGIC ;
+	    	rdreq		: IN STD_LOGIC ;
+	    	wrclk		: IN STD_LOGIC ;
+	    	wrreq		: IN STD_LOGIC ;
+	    	q		: OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
+	    	rdempty		: OUT STD_LOGIC ;
+	    	wrfull		: OUT STD_LOGIC 
+	    );
     end component;
 
     ---------------------------------------------------------------------------
@@ -105,7 +101,7 @@ begin
     ---------------------------------------------------------------------------
     PLL1_inst : pll1
         port map (
-            areset => rst_l,
+            areset => not rst_l, --maybe not negated? idk
 		    inclk0 => ADC_CLK_10,
 		    c0 => uart_clk_tx, -- 0.0192 MHz (tx clk)
 		    c1 => uart_clk_rx -- 0.1536 MHz (rx clk)
@@ -114,70 +110,62 @@ begin
     ---------------------------------------------------------------------------
     -- Dual Clock FIFO Instantiations (one for RX, one for TX)
     ---------------------------------------------------------------------------
-    DCFIFO_inst_rx : dcfifo
-        generic map (
-            width => 8,
-            depth => 4
-        )
+    DCFIFO_inst_rx : dcfifo2
         port map (
-            wr => rx_fifo_write,
-            wr_data => uart_in_from_rxfifo,
-            wr_clk => uart_clk_rx,
-            wr_full => rx_fifo_full,
-            rd => rx_fifo_read,
-            rd_data => tx_data,
-            rd_clk => uart_clk,
-            rd_empty => rx_fifo_empty
+            data => rx_out_to_fifo,
+            rdclk => uart_clk_rx,
+            rdreq => rx_fifo_read,
+            wrclk => uart_clk_rx,
+            wrreq => rx_fifo_write,
+            q => uart_in_from_rxfifo,
+            rdempty => rx_fifo_empty,
+            wrfull => rx_fifo_full
         );
 
-    DCFIFO_inst_tx : dcfifo
-        generic map (
-            width => 8,
-            depth => 4
-        )
+    DCFIFO_inst_tx : dcfifo2
         port map (
-            wr => tx_write,
-            wr_data => tx_data,
-            wr_clk => uart_clk,
-            wr_full => open,
-            rd => '1',
-            rd_data => open,
-            rd_clk => uart_clk,
-            rd_empty => tx_done
+            data => uart_out_to_txfifo,
+            rdclk => uart_clk_tx,
+            rdreq => tx_fifo_read,
+            wrclk => uart_clk_tx,
+            wrreq => tx_fifo_write,
+            q => tx_in_from_fifo,
+            rdempty => tx_fifo_empty,
+            wrfull => tx_fifo_full
         );
 
     ---------------------------------------------------------------------------
-    -- UART RX Instantiation  TODO: fix GPIO ports
+    -- UART RX Instantiation
     ---------------------------------------------------------------------------
     UART_RX_inst : UART_RX
         port map (
-            clk => uart_clk,
+            clk => uart_clk_rx,
             rst_l => rst_l,
             rx => RX,
-            rx_data => rx_data,
-            rx_done => rx_done
+            rx_data => rx_out_to_fifo,
+            rx_done => rx_fifo_write
         );
 
     ---------------------------------------------------------------------------
-    -- UART TX Instantiation  TODO: fix GPIO ports
+    -- UART TX Instantiation
     ---------------------------------------------------------------------------
     UART_TX_inst : UART_TX
         port map (
-            clk => uart_clk,
+            clk => uart_clk_tx,
             rst_l => rst_l,
             tx_data => tx_data,
-            tx_write => tx_write,
+            tx_write => not tx_fifo_empty,
             tx => TX,
-            tx_done => tx_done
+            tx_done => tx_fifo_read
         );
     
     ---------------------------------------------------------------------------
     -- Synchronous process to handle state transitions, and Asyncronous reset
     ---------------------------------------------------------------------------
-    process (ADC_CLK_10, rst_l) begin
+    process (uart_clk_tx, rst_l) begin
         if (rst_l = '0') then
             state <= idle;
-        elsif rising_edge(ADC_CLK_10) then
+        elsif rising_edge(uart_clk_tx) then
             state <= next_state;
         end if;
     end process;
@@ -185,31 +173,31 @@ begin
     ---------------------------------------------------------------------------
     -- State machine to handle UART RX and TX
     ---------------------------------------------------------------------------
-    process (state, rx_done, tx_done, rx_data, tx_data) begin
+    process (state, rx_fifo_empty, uart_in_from_rxfifo) begin
         case state is
             when idle =>
-                tx_write <= '0';
-                if (rx_done = '1') then
+                tx_fifo_write <= '0';
+                rx_fifo_read <= '0';
+                if (rx_fifo_empty = '0') then
                     next_state <= send;
                     --some lovely typecasting :)
-                    if (unsigned(rx_data) >= 65 and unsigned(rx_data) <= 90) or (unsigned(rx_data) >= 97 and unsigned(rx_data) <= 122) then
-                        tx_data <= rx_data xor "00100000";
+                    if (unsigned(uart_in_from_rxfifo) >= 65 and unsigned(uart_in_from_rxfifo) <= 90) or (unsigned(uart_in_from_rxfifo) >= 97 and unsigned(uart_in_from_rxfifo) <= 122) then
+                        uart_out_to_txfifo <= uart_in_from_rxfifo xor "00100000";
                     else
                         --send E for error
-                        tx_data <= "01000101"; --nice
+                        uart_out_to_txfifo <= "01000101"; --nice
                     end if;   
                 else
                     next_state <= idle;
                 end if;
             when send =>
-                tx_write <= '1';
-                if tx_done = '1' then
-                    next_state <= idle;
-                else
-                    next_state <= send;
-                end if;
+                tx_fifo_write <= '1';
+                rx_fifo_read <= '1';
+                next_state <= idle;
             when others =>
                 next_state <= idle;
+                tx_fifo_write <= '0';
+                rx_fifo_read <= '0';
         end case;
     end process;
 

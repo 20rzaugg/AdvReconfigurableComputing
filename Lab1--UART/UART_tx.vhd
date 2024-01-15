@@ -15,14 +15,11 @@ architecture behavioral of UART_TX is
     type state_type is (idle, start, data, stop);
     signal state : state_type := idle;
     signal next_state : state_type := idle;
-    signal oversample_count : integer range 0 to 7 := 0; -- counts how many times we've sampled the RX line per bit
-    signal next_oversample_count : integer range 0 to 7 := 0;
     signal bit_count : integer range 0 to 7 := 0; -- counts which bit we're on in the data state
     signal next_bit_count : integer range 0 to 7 := 0;
 
     signal tx_data_reg : std_logic_vector (7 downto 0) := "00000000"; -- lock in TX data so the input signal can be changed during transmission
 
-    signal clk_counter : integer range 0 to 127 := 0;
 
 begin
 
@@ -34,22 +31,13 @@ begin
             
         --Rising clock edge
         elsif rising_edge(clk) then
-            --Count to 65 to get 19200 baud, oversampled by 8 (supposedly)
-            if clk_counter >= 63 then
-                clk_counter <= 0;
-                state <= next_state;
-                oversample_count <= next_oversample_count;
-                bit_count <= next_bit_count;
-            else
-                clk_counter <= clk_counter + 1;
-                state <= state;
-                oversample_count <= oversample_count;
-                bit_count <= bit_count;
-            end if;
+            state <= next_state;
+            oversample_count <= next_oversample_count;
+            bit_count <= next_bit_count;
         end if;
     end process;
 
-    process (clk, rst_l, state, next_state, oversample_count, next_oversample_count, bit_count, next_bit_count, tx_data, tx_write, tx_data_reg) begin
+    process (clk, rst_l, state, next_state, bit_count, next_bit_count, tx_data, tx_write, tx_data_reg) begin
         case state is
             -------------------------------------------------------------------
             -- IDLE state, wait for tx_write to go high
@@ -61,11 +49,9 @@ begin
                 if tx_write = '1' then
                     next_state <= start;
                     next_bit_count <= 0;
-                    next_oversample_count <= 0;
                 else
                     next_state <= idle;
                     next_bit_count <= 0;
-                    next_oversample_count <= 0;
                 end if;
             -------------------------------------------------------------------
             -- START state, wait 8 clocks to transmit data
@@ -74,15 +60,8 @@ begin
                 tx <= '0';
                 tx_done <= '0';
                 tx_data_reg <= tx_data_reg;
-                if oversample_count = 7 then
-                    next_state <= data;
-                    next_oversample_count <= 0;
-                    next_bit_count <= 0;    
-                else
-                    next_state <= start;
-                    next_oversample_count <= oversample_count + 1;
-                    next_bit_count <= 0;
-                end if;
+                next_state <= data;
+                next_bit_count <= 0;    
             -------------------------------------------------------------------
             -- DATA state, transmit data, 8 clock cycles per bit
             -------------------------------------------------------------------
@@ -90,20 +69,12 @@ begin
                 tx <= tx_data(bit_count);
                 tx_done <= '0';
                 tx_data_reg <= tx_data_reg;
-                if oversample_count = 7 then
-                    if bit_count = 7 then
-                        next_state <= stop;
-                        next_oversample_count <= 0;
-                        next_bit_count <= 0;
-                    else
-                        next_state <= data;
-                        next_oversample_count <= 0;
-                        next_bit_count <= bit_count + 1;
-                    end if;
+                if bit_count = 7 then
+                    next_state <= stop;
+                    next_bit_count <= 0;
                 else
                     next_state <= data;
-                    next_oversample_count <= oversample_count + 1;
-                    next_bit_count <= bit_count;
+                    next_bit_count <= bit_count + 1;
                 end if;
             -- no parity bit
             -------------------------------------------------------------------
@@ -111,17 +82,10 @@ begin
             -------------------------------------------------------------------
             when stop =>
                 tx <= '1';
-                tx_done <= '1';
                 tx_data_reg <= tx_data_reg;
-                if oversample_count = 7 then
-                    next_state <= idle;
-                    next_oversample_count <= 0;
-                    next_bit_count <= 0;
-                else
-                    next_state <= stop;
-                    next_oversample_count <= oversample_count + 1;
-                    next_bit_count <= 0;
-                end if;
+                next_state <= idle;
+                next_bit_count <= 0;
+                tx_done <= '1';
         end case;
     end process;
 

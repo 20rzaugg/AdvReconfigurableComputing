@@ -45,3 +45,4 @@ set_location_assignment PIN_AA2 -to TX
 
 
 set_global_assignment -name QIP_FILE pll1.qip
+set_global_assignment -name QIP_FILE dcfifo2.qip
