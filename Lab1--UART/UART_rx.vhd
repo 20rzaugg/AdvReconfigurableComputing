@@ -28,9 +28,6 @@ begin
         -- Asynchronous reset
         if rst_l = '0' then
             state <= idle;
-            oversample_reg <= 0;
-            oversample_count <= 0;
-            bit_count <= 0;
         --Rising clock edge
         elsif rising_edge(clk) then
             state <= next_state;
@@ -40,7 +37,7 @@ begin
         end if;
     end process;
 
-    process (state, rx, next_state, rx_data, rx_done, oversample_reg, oversample_count, bit_count) begin
+    process (state, rx, next_state, oversample_reg, oversample_count, bit_count) begin
         case state is
             -------------------------------------------------------------------
             -- IDLE state, wait for start bit
@@ -57,20 +54,18 @@ begin
                     next_state <= idle;
                     next_bit_count <= 0;
                     next_oversample_count <= 0;
-                    rx_data <= rx_data;
                 end if;
             -------------------------------------------------------------------
             -- START state, wait 8 clocks to sample data
             -------------------------------------------------------------------
             when start =>
-                rx_data <= rx_data;
                 rx_done <= '0';
                 next_oversample_reg <= 0;
                 if oversample_count = 7 then
                     next_state <= data;
                     next_oversample_count <= 0;
                     next_bit_count <= 0;
-                    oversample_reg <= 0;
+                    next_oversample_reg <= 0;
                 else
                     next_state <= start;
                     next_oversample_count <= oversample_count + 1;
@@ -125,12 +120,12 @@ begin
                     next_bit_count <= 0;
                 end if;
             when others =>
-					next_state <= idle;
-					next_oversample_count <= 0;
-					next_bit_count <= 0;
-					rx_done <= '0';
-                    rx_data <= (others => '0');
-                    next_oversample_reg <= 0;
+				next_state <= idle;
+				next_oversample_count <= 0;
+				next_bit_count <= 0;
+				rx_done <= '0';
+                rx_data <= (others => '0');
+                next_oversample_reg <= 0;
         end case;
     end process;
 end Behavioral;

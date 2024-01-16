@@ -32,7 +32,6 @@ begin
         --Rising clock edge
         elsif rising_edge(clk) then
             state <= next_state;
-            oversample_count <= next_oversample_count;
             bit_count <= next_bit_count;
         end if;
     end process;

@@ -153,7 +153,7 @@ begin
         port map (
             clk => uart_clk_tx,
             rst_l => rst_l,
-            tx_data => tx_data,
+            tx_data => tx_in_from_fifo,
             tx_write => not tx_fifo_empty,
             tx => TX,
             tx_done => tx_fifo_read
