@@ -23,3 +23,4 @@
 *.sta.rpt
 *.sta.summary
 *.wlf
+*(intensive debug)/

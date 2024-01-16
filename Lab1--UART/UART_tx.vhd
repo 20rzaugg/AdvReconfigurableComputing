@@ -7,12 +7,12 @@ entity UART_TX is
            tx_data : in  STD_LOGIC_VECTOR (7 downto 0);
            tx_write : in STD_LOGIC;
            tx : out  STD_LOGIC;
-           tx_done : out  STD_LOGIC);
+           read_from_buffer : out  STD_LOGIC);
 end UART_TX;
 
 architecture behavioral of UART_TX is
 
-    type state_type is (idle, start, data, stop);
+    type state_type is (idle, read, start, data, stop);
     signal state : state_type := idle;
     signal next_state : state_type := idle;
     signal bit_count : integer range 0 to 7 := 0; -- counts which bit we're on in the data state
@@ -43,21 +43,28 @@ begin
             -------------------------------------------------------------------
             when idle =>
                 tx <= '1';
-                tx_done <= '0';
-                tx_data_reg <= tx_data;
+                tx_data_reg <= tx_data_reg;
                 if tx_write = '1' then
-                    next_state <= start;
+                    next_state <= read;
                     next_bit_count <= 0;
+                    read_from_buffer <= '1';
                 else
                     next_state <= idle;
                     next_bit_count <= 0;
+                    read_from_buffer <= '0';
                 end if;
             -------------------------------------------------------------------
             -- START state, wait 8 clocks to transmit data
             -------------------------------------------------------------------
+            when read =>
+                tx <= '1';
+                read_from_buffer <= '0';
+                tx_data_reg <= tx_data;
+                next_state <= start;
+                next_bit_count <= 0;
             when start =>
                 tx <= '0';
-                tx_done <= '0';
+                read_from_buffer <= '0';
                 tx_data_reg <= tx_data_reg;
                 next_state <= data;
                 next_bit_count <= 0;    
@@ -66,7 +73,7 @@ begin
             -------------------------------------------------------------------
             when data =>
                 tx <= tx_data(bit_count);
-                tx_done <= '0';
+                read_from_buffer <= '0';
                 tx_data_reg <= tx_data_reg;
                 if bit_count = 7 then
                     next_state <= stop;
@@ -84,7 +91,7 @@ begin
                 tx_data_reg <= tx_data_reg;
                 next_state <= idle;
                 next_bit_count <= 0;
-                tx_done <= '1';
+                read_from_buffer <= '0';
         end case;
     end process;
 

@@ -65,14 +65,14 @@ architecture behavioral of UART is
                tx_data : in  STD_LOGIC_VECTOR (7 downto 0);
                tx_write : in STD_LOGIC;
                tx : out  STD_LOGIC;
-               tx_done : out  STD_LOGIC);
+               read_from_buffer : out  STD_LOGIC);
     end component;
 
     signal rst_l : std_logic := '0';
 
-    type state_type is (idle, send);
-    signal state : state_type := idle;
-    signal next_state : state_type := idle;
+    type state_type is (iidle, rread, pprocess, wwrite);
+    signal state : state_type := iidle;
+    signal next_state : state_type := iidle;
 
     signal uart_clk_rx : std_logic;
     signal uart_clk_tx : std_logic;
@@ -87,15 +87,15 @@ architecture behavioral of UART is
     signal rx_fifo_full : std_logic;
     signal rx_fifo_empty : std_logic;
     signal rx_fifo_write : std_logic;
-    signal rx_fifo_read : std_logic;
+    signal rx_fifo_read : std_logic := '0';
 
     signal tx_fifo_full : std_logic;
     signal tx_fifo_empty : std_logic;
-    signal tx_fifo_write : std_logic;
+    signal tx_fifo_write : std_logic := '0';
     signal tx_fifo_read : std_logic;
 
 begin
-    rst_l <= not KEY(0);
+    rst_l <= KEY(0);
     ---------------------------------------------------------------------------
     -- PLL Instantiation
     ---------------------------------------------------------------------------
@@ -156,7 +156,7 @@ begin
             tx_data => tx_in_from_fifo,
             tx_write => not tx_fifo_empty,
             tx => TX,
-            tx_done => tx_fifo_read
+            read_from_buffer => tx_fifo_read
         );
     
     ---------------------------------------------------------------------------
@@ -164,7 +164,7 @@ begin
     ---------------------------------------------------------------------------
     process (uart_clk_tx, rst_l) begin
         if (rst_l = '0') then
-            state <= idle;
+            state <= iidle;
         elsif rising_edge(uart_clk_tx) then
             state <= next_state;
         end if;
@@ -175,27 +175,37 @@ begin
     ---------------------------------------------------------------------------
     process (state, rx_fifo_empty, uart_in_from_rxfifo) begin
         case state is
-            when idle =>
+            when iidle =>
                 tx_fifo_write <= '0';
-                rx_fifo_read <= '0';
+                
                 if (rx_fifo_empty = '0') then
-                    next_state <= send;
-                    --some lovely typecasting :)
-                    if (unsigned(uart_in_from_rxfifo) >= 65 and unsigned(uart_in_from_rxfifo) <= 90) or (unsigned(uart_in_from_rxfifo) >= 97 and unsigned(uart_in_from_rxfifo) <= 122) then
-                        uart_out_to_txfifo <= uart_in_from_rxfifo xor "00100000";
-                    else
-                        --send E for error
-                        uart_out_to_txfifo <= "01000101"; --nice
-                    end if;   
+                    next_state <= rread;
+						  rx_fifo_read <= '0';
                 else
-                    next_state <= idle;
+                    next_state <= iidle;
+						  rx_fifo_read <= '1';
                 end if;
-            when send =>
-                tx_fifo_write <= '1';
+            when rread =>
                 rx_fifo_read <= '1';
-                next_state <= idle;
+                tx_fifo_write <= '0';
+                next_state <= pprocess;
+            when pprocess =>
+                rx_fifo_read <= '0';
+                tx_fifo_write <= '0';
+                next_state <= wwrite;
+                --some lovely typecasting :)
+                if (unsigned(uart_in_from_rxfifo) >= 65 and unsigned(uart_in_from_rxfifo) <= 90) or (unsigned(uart_in_from_rxfifo) >= 97 and unsigned(uart_in_from_rxfifo) <= 122) then
+                    uart_out_to_txfifo <= uart_in_from_rxfifo xor "00100000";
+                else
+                    --send E for error
+                    uart_out_to_txfifo <= "00111111"; --nice
+                end if;   
+            when wwrite =>
+                tx_fifo_write <= '1';
+                rx_fifo_read <= '0';
+                next_state <= iidle;
             when others =>
-                next_state <= idle;
+                next_state <= iidle;
                 tx_fifo_write <= '0';
                 rx_fifo_read <= '0';
         end case;

@@ -21,8 +21,12 @@ architecture Behavioral of UART_RX is
     signal next_oversample_count : integer range 0 to 7 := 0;
     signal bit_count : integer range 0 to 7 := 0; -- counts which bit we're on in the data state
     signal next_bit_count : integer range 0 to 7 := 0;
+    signal rx_data_reg : STD_LOGIC_VECTOR (7 downto 0) := (others => '0');
+    signal next_rx_data_reg : STD_LOGIC_VECTOR (7 downto 0) := (others => '0');
 
 begin
+    rx_data <= rx_data_reg;
+
     -- Synchronous process, handles clock and reset
     process (clk, rst_l) begin
         -- Asynchronous reset
@@ -34,10 +38,12 @@ begin
             oversample_count <= next_oversample_count;
             bit_count <= next_bit_count;
             oversample_reg <= next_oversample_reg;
+            rx_data_reg <= next_rx_data_reg;
         end if;
     end process;
 
     process (state, rx, next_state, oversample_reg, oversample_count, bit_count) begin
+        next_rx_data_reg <= rx_data_reg;
         case state is
             -------------------------------------------------------------------
             -- IDLE state, wait for start bit
@@ -49,7 +55,7 @@ begin
                     next_state <= start;
                     next_bit_count <= 0;
                     next_oversample_count <= 0;
-                    rx_data <= (others => '0');
+                    next_rx_data_reg <= (others => '0');
                 else
                     next_state <= idle;
                     next_bit_count <= 0;
@@ -60,16 +66,14 @@ begin
             -------------------------------------------------------------------
             when start =>
                 rx_done <= '0';
+                next_bit_count <= 0;
                 next_oversample_reg <= 0;
                 if oversample_count = 7 then
                     next_state <= data;
-                    next_oversample_count <= 0;
-                    next_bit_count <= 0;
-                    next_oversample_reg <= 0;
+                    next_oversample_count <= 1;
                 else
                     next_state <= start;
                     next_oversample_count <= oversample_count + 1;
-                    next_bit_count <= 0;
                 end if;
             -------------------------------------------------------------------
             -- DATA state, sample data 8 times per bit, majority rules
@@ -81,22 +85,23 @@ begin
                         next_state <= stop;
                         next_oversample_count <= 0;
                         next_bit_count <= 0;
+                        next_oversample_reg <= 0;
                     else
                         next_state <= data;
                         next_oversample_count <= 0;
                         next_oversample_reg <= 0;
                         next_bit_count <= bit_count + 1;
-                        if oversample_reg > 2 then --tie goes to 1
-                            rx_data(bit_count) <= '1';
+                        if oversample_reg > 1 then
+                            next_rx_data_reg(bit_count) <= '1';
                         else
-                            rx_data(bit_count) <= '0';
+                            next_rx_data_reg(bit_count) <= '0';
                         end if;
                     end if;
                 else
                     next_state <= data;
                     next_oversample_count <= oversample_count + 1;
                     next_bit_count <= bit_count;
-                    if rx = '1' and bit_count > 0 and bit_count < 7 then -- ignore samples 0 and 7
+                    if rx = '1' and oversample_count > 1 and oversample_count < 5 then
                         next_oversample_reg <= oversample_reg + 1;
                     else
                         next_oversample_reg <= oversample_reg;
@@ -124,7 +129,7 @@ begin
 				next_oversample_count <= 0;
 				next_bit_count <= 0;
 				rx_done <= '0';
-                rx_data <= (others => '0');
+                next_rx_data_reg <= (others => '0');
                 next_oversample_reg <= 0;
         end case;
     end process;
