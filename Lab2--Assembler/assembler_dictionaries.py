@@ -5,6 +5,7 @@ rsrc2 = 2
 imm = 3
 addr_offset = 4
 addr_base = 5
+addr_abs = 6
 
 instruction_set = {
      "NOOP":  { "opcode": "000000",
@@ -12,11 +13,11 @@ instruction_set = {
                  },
      "LW":    {
                      "opcode": "000001",
-                     "operands": [(rdest, 5),(addr_offset, 5),(addr_base, 16)]
+                     "operands": [(rdest, 5),(addr_base, 5),(addr_offset, 16)]
                  },
      "SW":    {
                      "opcode": "000010",
-                     "operands": [(rsrc1, 5),(addr_offset, 5),(addr_base, 16)]
+                     "operands": [(addr_base, 5),(addr_offset, 16),(rsrc1, 5)]
                  },
      "ADD":   {
                      "opcode": "000011",
@@ -84,7 +85,7 @@ instruction_set = {
                  },
      "SRL":   {
                      "opcode": "010011",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SRLI":  {
                      "opcode": "010100",
@@ -92,7 +93,7 @@ instruction_set = {
                  },
      "SRA":   {
                      "opcode": "010101",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SRAI":  {
                      "opcode": "010110",
@@ -100,7 +101,7 @@ instruction_set = {
                  },
      "SLT":   {
                      "opcode": "010111",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SLTI":  {
                      "opcode": "011000",
@@ -108,7 +109,7 @@ instruction_set = {
                  },
      "SLTU":  {
                      "opcode": "011001",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SLTUI": {
                      "opcode": "011010",
@@ -116,7 +117,7 @@ instruction_set = {
                  },
      "SGT":   {
                      "opcode": "011011",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SGTI":  {
                      "opcode": "011100",
@@ -124,7 +125,7 @@ instruction_set = {
                  },
      "SGTU":  {
                      "opcode": "011101",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SGTUI": {
                      "opcode": "011110",
@@ -132,7 +133,7 @@ instruction_set = {
                  },
      "SLE":   {
                      "opcode": "011111",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SLEI":  {
                      "opcode": "100000",
@@ -140,7 +141,7 @@ instruction_set = {
                  },
      "SLEU":  {
                      "opcode": "100001",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SLEUI": {
                      "opcode": "100010",
@@ -148,7 +149,7 @@ instruction_set = {
                  },
      "SGE":   {
                      "opcode": "100011",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SGEI":  {
                      "opcode": "100100",
@@ -156,7 +157,7 @@ instruction_set = {
                  },
      "SGEU":  {
                      "opcode": "100101",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SGEUI": {
                      "opcode": "100110",
@@ -164,7 +165,7 @@ instruction_set = {
                  },
      "SEQ":   {
                      "opcode": "100111",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SEQI":  {
                      "opcode": "101000",
@@ -172,7 +173,7 @@ instruction_set = {
                  },
      "SNE":   {
                      "opcode": "101001",
-                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5)]
+                     "operands": [(rdest, 5),(rsrc1, 5),(rsrc2, 5), (unused, 11)]
                  },
      "SNEI":  {
                      "opcode": "101010",
@@ -180,15 +181,15 @@ instruction_set = {
                  },
      "BEQZ":  {
                      "opcode": "101011",
-                     "operands": [(rsrc1, 5),(unused, 5),(imm, 16)]
+                     "operands": [(rsrc1, 5),(addr_abs, 21)]
                  },
      "BNEZ":  {
                      "opcode": "101100",
-                     "operands": [(rsrc1, 5),(unused, 5),(imm, 16)]
+                     "operands": [(rsrc1, 5),(addr_abs, 21)]
                  },
      "J":     {
                      "opcode": "101101",
-                     "operands": [(unused, 26)]
+                     "operands": [(addr_abs, 26)]
                  },
      "JR":    {
                      "opcode": "101110",
@@ -196,10 +197,45 @@ instruction_set = {
                  },
      "JAL":   {
                      "opcode": "101111",
-                     "operands": [(unused, 26)]
+                     "operands": [(addr_abs, 26)]
                  },
      "JALR":  {
                      "opcode": "110000",
                      "operands": [(rsrc1, 5),(unused, 21)]
                  }
+}
+
+register_set = {
+    "R0": "00000",
+    "R1": "00001",
+    "R2": "00010",
+    "R3": "00011",
+    "R4": "00100",
+    "R5": "00101",
+    "R6": "00110",
+    "R7": "00111",
+    "R8": "01000",
+    "R9": "01001",
+    "R10": "01010",
+    "R11": "01011",
+    "R12": "01100",
+    "R13": "01101",
+    "R14": "01110",
+    "R15": "01111",
+    "R16": "10000",
+    "R17": "10001",
+    "R18": "10010",
+    "R19": "10011",
+    "R20": "10100",
+    "R21": "10101",
+    "R22": "10110",
+    "R23": "10111",
+    "R24": "11000",
+    "R25": "11001",
+    "R26": "11010",
+    "R27": "11011",
+    "R28": "11100",
+    "R29": "11101",
+    "R30": "11110",
+    "R31": "11111"
 }
