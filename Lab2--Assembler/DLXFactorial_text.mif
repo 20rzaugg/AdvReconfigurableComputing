@@ -5,7 +5,7 @@ DATA_RADIX = HEX;
 CONTENT 
 BEGIN
 
-000 : 04200000;		-- LW R1,  n(R0)
+000 : 04200000;		-- LW R1, n(R0)
 001 : 10400000;		-- ADDI R2, R0, 0
 002 : 10600000;		-- ADDI R3, R0, 0
 003 : 05400000;		-- LW R10, n(R0)
@@ -26,3 +26,5 @@ BEGIN
 012 : B4000012;		-- J done
 
 END;
+
+

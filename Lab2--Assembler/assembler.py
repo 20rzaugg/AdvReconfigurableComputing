@@ -48,6 +48,7 @@ if __name__ == "__main__":
                         else:
                             instruction_memory_table[K] = instruction_address
     mode = 0
+    line_number = 1
     input_file.seek(0)
     output_file = open(text_output_file_name, "w")
     output_file.write(
@@ -62,14 +63,18 @@ BEGIN\n\n""")
         line = line.strip()
         if line:
             if line[0] == ';' or line[0] == '\n':
+                line_number += 1
                 continue
             if ".DATA" in line.upper():
+                line_number += 1
                 mode = DATA
                 continue
             elif ".TEXT" in line.upper():
+                line_number += 1
                 mode = TEXT
                 continue
             if mode == DATA:
+                line_number += 1
                 continue
             elif mode == TEXT:
                 k = re.findall(r"\w+", line)
@@ -85,7 +90,7 @@ BEGIN\n\n""")
                                     b += register_set[k[arg].upper()]
                                     arg += 1
                                 else:
-                                    print("Error: Invalid register name\n"+line)
+                                    print("Error: Invalid register name\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                                     exit(1)
                             elif i[0] == imm:
                                 if k[arg] in data_memory_table.keys():
@@ -97,8 +102,11 @@ BEGIN\n\n""")
                                         if x >= 0 and x < 65536:
                                             b += format(x, '016b')
                                             arg += 1
+                                        else:
+                                            print("Error: Immediate out of range\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
+                                            exit(1)
                                     except ValueError:
-                                        print("Error: Invalid address\n"+line)
+                                        print("Error: Unknown variable immediate\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                                         exit(1)
                             elif i[0] == addr_abs:
                                 if k[arg].upper() in instruction_memory_table.keys():
@@ -110,8 +118,11 @@ BEGIN\n\n""")
                                         if x >= 0 and x < 2097152:
                                             b += format(x, '021b')
                                             arg += 1
+                                        else:
+                                            print("Error: Address out of range\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
+                                            exit(1)
                                     except ValueError:
-                                        print("Error: Invalid address\n"+line)
+                                        print("Error: Unknown variable address\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                                         exit(1)
                             elif i[0] == addr_offset:
                                 if k[arg] in data_memory_table.keys():
@@ -124,7 +135,7 @@ BEGIN\n\n""")
                                             b += format(x, '016b')
                                             arg += 1
                                     except ValueError:
-                                        print("Error: Invalid address\n"+line)
+                                        print("Error: Unknown variable address\nline "+str(line_number) + ": " + line)
                                         exit(1)
                             elif i[0] == unused:
                                 b += '0'*i[1]
@@ -132,6 +143,7 @@ BEGIN\n\n""")
                         a = format(instruction_address, '03X')
                         output_file.write(a + " : " + x + ";\t\t-- " + line.replace('\t\t',' ') + "\n")
                         instruction_address += 1
+        line_number += 1
     output_file.write("\nEND;\n")
     input_file.close()
     output_file.close()
