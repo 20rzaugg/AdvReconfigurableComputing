@@ -1,7 +1,7 @@
 library IEEE;
+library work;
 use IEEE.STD_LOGIC_1164.ALL;
-library dlxlib;
-use dlxlib.all;
+use work.dlxlib.all;
 
 entity TBfetch is
 end TBfetch;
@@ -14,7 +14,7 @@ architecture testbench of TBfetch is
             addr_selector : in std_logic;
             branch_addr : in std_logic_vector(ADDR_WIDTH-1 downto 0);
             next_pc : out std_logic_vector(ADDR_WIDTH-1 downto 0);
-            instr : out std_logic_vectory(DATA_WIDTH-1 downto 0);
+            instr : out std_logic_vector(DATA_WIDTH-1 downto 0)
         );
     end component;
 
@@ -25,7 +25,7 @@ architecture testbench of TBfetch is
     signal next_pc : std_logic_vector(ADDR_WIDTH-1 downto 0);
     signal instr : std_logic_vector(DATA_WIDTH-1 downto 0);
 
-    type addr_type is array (0 to 72) of std_logic_vectory(ADDR_WIDTH-1 downto 0);
+    type addr_type is array (0 to 72) of std_logic_vector(ADDR_WIDTH-1 downto 0);
     signal expected_PC : addr_type := (
         "0000000000",
         "0000000001",
@@ -171,13 +171,19 @@ architecture testbench of TBfetch is
         x"204A0001",
         x"08000401",
         x"B4000012",
-        x"UUUUUUUU",
-        x"UUUUUUUU",
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         x"B4000012",
-        x"UUUUUUUU",
-        x"UUUUUUUU",
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         x"B4000012"
     );
+
+    signal index : integer := 0;
+    signal next_index : integer := 0;
+
+    signal next_addr_selector : std_logic := '0';
+    signal next_branch_addr : std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
 
 begin
     DUT : dlx_fetch
@@ -195,7 +201,57 @@ begin
             wait for 5 ns;
             clk <= not clk;
         end process;
-end
-end testbench;
+
+        process (clk) begin
+            if rising_edge(clk) then
+                index <= next_index;
+                addr_selector <= next_addr_selector;
+                branch_addr <= next_branch_addr;
+            end if;
+        end process;
+
+        process (index, addr_selector, branch_addr, next_pc, instr) begin
+            if index > 72 then
+                assert false report "Simulation finished" severity failure;
+            end if;
+            assert next_pc = expected_PC(index) report "PC is not correct" severity error;
+            assert instr = expected_instr(index) report "Instruction is not correct" severity error;
+            next_index <= index + 1;
+            next_addr_selector <= '1';
+            case index is
+                when 11 => --
+                    next_branch_addr <= "0000001010";
+                when 18 => --
+                    next_branch_addr <= "0000001010";
+                when 25 => --
+                    next_branch_addr <= "0000001010";
+                when 29 => --
+                    next_branch_addr <= "0000010000";
+                when 32 => --
+                    next_branch_addr <= "0000001001";
+                when 36 => --
+                    next_branch_addr <= "0000000100";
+                when 43 => --
+                    next_branch_addr <= "0000001010";
+                when 50 => --
+                    next_branch_addr <= "0000001010";
+                when 54 => --
+                    next_branch_addr <= "0000010000";
+                when 57 => --
+                    next_branch_addr <= "0000001001";
+                when 61 =>
+                    next_branch_addr <= "0000000100";
+                when 65 =>
+                    next_branch_addr <= "0000010001";
+                when 69 =>
+                    next_branch_addr <= "0000010010";
+                when 71 =>
+                    next_branch_addr <= "0000001001";
+                when others =>
+                    next_addr_selector <= '0';
+                    next_branch_addr <= (others => '0');
+            end case;
+        end process;
+end architecture;
 
 

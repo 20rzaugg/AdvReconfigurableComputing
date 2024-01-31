@@ -1,5 +1,7 @@
+library IEEE;
+library work;
 use IEEE.std_logic_1164.all;
-use dlxlib.all;
+use work.dlxlib.all;
 
 entity dlx_fetch is
     port (
@@ -8,7 +10,7 @@ entity dlx_fetch is
         addr_selector : in std_logic;
         branch_addr : in std_logic_vector(ADDR_WIDTH-1 downto 0);
         next_pc : out std_logic_vector(ADDR_WIDTH-1 downto 0);
-        instr : out std_logic_vectory(DATA_WIDTH-1 downto 0);
+        instr : out std_logic_vector(DATA_WIDTH-1 downto 0)
     );
 end entity dlx_fetch;
 
