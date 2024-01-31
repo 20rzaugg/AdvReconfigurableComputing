@@ -1,0 +1,73 @@
+000 04200000
+001 10400000
+002 10600000
+003 05400000
+004 816A0001 --main loop iteration 1 (n = 3)
+005 B1600011
+006 10610000
+007 204A0001
+008 BC00000B (branch to mult 00B) --first mult function call (loops 2 times)
+009 214A0001 (cut instruction)
+00A B4000004 (cut instruction)
+00B 81620001
+00C B1600010
+00D 0C211800
+00E 20420001
+00F B400000B (branch to mult 00B) --1
+010 BBE00000 (cut instruction)
+011 08000401 (cut instruction)
+00B 81620001
+00C B1600010
+00D 0C211800
+00E 20420001
+00F B400000B (branch to mult 00B) --2
+010 BBE00000 (cut instruction)
+011 08000401 (cut instruction)
+00B 81620001
+00C B1600010 (branch to end 010) --branch to end of multiply function
+00D 0C211800 (cut instruction)
+00E 20420001
+010 BBE00000 (branch to 009) --return from multiply function
+011 08000401 (cut instruction)
+012 B4000012 (cut instruction)
+009 214A0001
+00A B4000004 (branch to top 004) --main loop iteration 2 (n = 2)
+00B 81620001 (cut instruction)
+00C B1600010 (cut instruction)
+004 816A0001
+005 B1600011
+006 10610000
+007 204A0001
+008 BC00000B (branch to mult 00B) --second mult function call (loops 1 time)
+009 214A0001 (cut instruction)
+00A B4000004 (cut instruction)
+00B 81620001
+00C B1600010
+00D 0C211800
+00E 20420001
+00F B400000B (branch to mult 00B) --1
+010 BBE00000 (cut instruction)
+011 08000401 (cut instruction)
+00B 81620001
+00C B1600010 (branch to end 010) --branch to end of multiply function
+00D 0C211800 (cut instruction)
+00E 20420001
+010 BBE00000 (branch to 009) --return from multiply function
+011 08000401 (cut instruction)
+012 B4000012 (cut instruction)
+009 214A0001
+00A B4000004 (branch to top 004) --main loop iteration 3 (n = 1)
+00B 81620001 (cut instruction)
+00C B1600010 (cut instruction)
+004 816A0001
+005 B1600011 (branch to exit 011)
+006 10610000 (cut instruction)
+007 204A0001 (cut instruction)
+011 08000401 (exit)
+012 B4000012 (branch to done 012)
+013 ???????? (cut instruction)
+014 ???????? (cut instruction)
+012 B4000012 (branch to done 012)
+013 ???????? (cut instruction)
+014 ???????? (cut instruction)
+012 B4000012 (branch to done 012)
