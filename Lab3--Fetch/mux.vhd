@@ -1,5 +1,7 @@
+library IEEE;
+library work;
 use IEEE.STD_LOGIC_1164.ALL;
-use dlxlib.all;
+use work.dlxlib.all;
 
 entity mux2_1 is
     Port (
@@ -8,9 +10,9 @@ entity mux2_1 is
         in1  : in std_logic_vector(ADDR_WIDTH-1 downto 0);
         out0 : out std_logic_vector(ADDR_WIDTH-1 downto 0)
     );
-end mux;
+end mux2_1;
 
-architecture Behavioral of mux is
+architecture Behavioral of mux2_1 is
 begin
     process(sel, in0, in1) begin
         if sel = '0' then

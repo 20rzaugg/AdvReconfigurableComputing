@@ -24,3 +24,4 @@
 *.sta.summary
 *.wlf
 *(intensive debug)/
+*work/

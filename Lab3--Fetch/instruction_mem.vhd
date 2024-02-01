@@ -45,33 +45,33 @@ ENTITY instruction_mem IS
 	(
 		address		: IN STD_LOGIC_VECTOR (9 DOWNTO 0);
 		clock		: IN STD_LOGIC  := '1';
-		q		: OUT STD_LOGIC_VECTOR (9 DOWNTO 0)
+		q		: OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
 	);
 END instruction_mem;
 
 
 ARCHITECTURE SYN OF instruction_mem IS
 
-	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (9 DOWNTO 0);
+	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 BEGIN
-	q    <= sub_wire0(9 DOWNTO 0);
+	q    <= sub_wire0(31 DOWNTO 0);
 
 	altsyncram_component : altsyncram
 	GENERIC MAP (
 		address_aclr_a => "NONE",
 		clock_enable_input_a => "BYPASS",
 		clock_enable_output_a => "BYPASS",
-		init_file => "DLXFactorial_text.mif",
+		init_file => "G:/My Drive/College/8_Spring2024/Adv Reconfigurable Computing/AdvReconfigurableComputing/Lab3--Fetch/DLXFactorial_text.mif",
 		intended_device_family => "MAX 10",
 		lpm_hint => "ENABLE_RUNTIME_MOD=NO",
 		lpm_type => "altsyncram",
 		numwords_a => 1024,
 		operation_mode => "ROM",
 		outdata_aclr_a => "NONE",
-		outdata_reg_a => "CLOCK0",
+		outdata_reg_a => "UNREGISTERED",
 		widthad_a => 10,
-		width_a => 10,
+		width_a => 32,
 		width_byteena_a => 1
 	)
 	PORT MAP (
@@ -108,12 +108,12 @@ END SYN;
 -- Retrieval info: PRIVATE: NUMWORDS_A NUMERIC "1024"
 -- Retrieval info: PRIVATE: RAM_BLOCK_TYPE NUMERIC "0"
 -- Retrieval info: PRIVATE: RegAddr NUMERIC "1"
--- Retrieval info: PRIVATE: RegOutput NUMERIC "1"
--- Retrieval info: PRIVATE: SYNTH_WRAPPER_GEN_POSTFIX STRING "0"
+-- Retrieval info: PRIVATE: RegOutput NUMERIC "0"
+-- Retrieval info: PRIVATE: SYNTH_WRAPPER_GEN_POSTFIX STRING "1"
 -- Retrieval info: PRIVATE: SingleClock NUMERIC "1"
 -- Retrieval info: PRIVATE: UseDQRAM NUMERIC "0"
 -- Retrieval info: PRIVATE: WidthAddr NUMERIC "10"
--- Retrieval info: PRIVATE: WidthData NUMERIC "10"
+-- Retrieval info: PRIVATE: WidthData NUMERIC "32"
 -- Retrieval info: PRIVATE: rden NUMERIC "0"
 -- Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
 -- Retrieval info: CONSTANT: ADDRESS_ACLR_A STRING "NONE"
@@ -126,18 +126,19 @@ END SYN;
 -- Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "1024"
 -- Retrieval info: CONSTANT: OPERATION_MODE STRING "ROM"
 -- Retrieval info: CONSTANT: OUTDATA_ACLR_A STRING "NONE"
--- Retrieval info: CONSTANT: OUTDATA_REG_A STRING "CLOCK0"
+-- Retrieval info: CONSTANT: OUTDATA_REG_A STRING "UNREGISTERED"
 -- Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "10"
--- Retrieval info: CONSTANT: WIDTH_A NUMERIC "10"
+-- Retrieval info: CONSTANT: WIDTH_A NUMERIC "32"
 -- Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
 -- Retrieval info: USED_PORT: address 0 0 10 0 INPUT NODEFVAL "address[9..0]"
 -- Retrieval info: USED_PORT: clock 0 0 0 0 INPUT VCC "clock"
--- Retrieval info: USED_PORT: q 0 0 10 0 OUTPUT NODEFVAL "q[9..0]"
+-- Retrieval info: USED_PORT: q 0 0 32 0 OUTPUT NODEFVAL "q[31..0]"
 -- Retrieval info: CONNECT: @address_a 0 0 10 0 address 0 0 10 0
 -- Retrieval info: CONNECT: @clock0 0 0 0 0 clock 0 0 0 0
--- Retrieval info: CONNECT: q 0 0 10 0 @q_a 0 0 10 0
+-- Retrieval info: CONNECT: q 0 0 32 0 @q_a 0 0 32 0
 -- Retrieval info: GEN_FILE: TYPE_NORMAL instruction_mem.vhd TRUE
 -- Retrieval info: GEN_FILE: TYPE_NORMAL instruction_mem.inc FALSE
 -- Retrieval info: GEN_FILE: TYPE_NORMAL instruction_mem.cmp TRUE
 -- Retrieval info: GEN_FILE: TYPE_NORMAL instruction_mem.bsf FALSE
 -- Retrieval info: GEN_FILE: TYPE_NORMAL instruction_mem_inst.vhd FALSE
+-- Retrieval info: GEN_FILE: TYPE_NORMAL instruction_mem_syn.v TRUE
