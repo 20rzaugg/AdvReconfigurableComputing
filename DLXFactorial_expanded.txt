@@ -51,7 +51,7 @@
 00B 81620001
 00C B1600010 (branch to end 010) --branch to end of multiply function
 00D 0C211800 (cut instruction)
-00E 20420001 (cut instruction)
+00E 20420001
 010 BBE00000 (branch to 009) --return from multiply function
 011 08000401 (cut instruction)
 012 B4000012 (cut instruction)
