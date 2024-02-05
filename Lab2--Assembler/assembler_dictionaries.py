@@ -10,11 +10,11 @@ instruction_set = {
                  },
      "LW":    {
                      "opcode": "000001",
-                     "operands": [(reg, 5),(addr_offset, 16),(reg, 5)]
+                     "operands": [(reg, 5),(reg, 5),(addr_offset, 16)]
                  },
      "SW":    {
                      "opcode": "000010",
-                     "operands": [(addr_offset, 16),(reg, 5),(reg, 5)]
+                     "operands": [(reg, 5),(reg, 5),(addr_offset, 16)]
                  },
      "ADD":   {
                      "opcode": "000011",
@@ -178,15 +178,15 @@ instruction_set = {
                  },
      "BEQZ":  {
                      "opcode": "101011",
-                     "operands": [(reg, 5),(addr_abs, 21)]
+                     "operands": [(reg, 5),(unused, 5),(addr_abs, 16)]
                  },
      "BNEZ":  {
                      "opcode": "101100",
-                     "operands": [(reg, 5),(addr_abs, 21)]
+                     "operands": [(reg, 5),(unused, 5),(addr_abs, 16)]
                  },
      "J":     {
                      "opcode": "101101",
-                     "operands": [(addr_abs, 26)]
+                     "operands": [(unused, 10),(addr_abs, 16)]
                  },
      "JR":    {
                      "opcode": "101110",
@@ -194,7 +194,7 @@ instruction_set = {
                  },
      "JAL":   {
                      "opcode": "101111",
-                     "operands": [(addr_abs, 26)]
+                     "operands": [(unused, 10),(addr_abs, 16)]
                  },
      "JALR":  {
                      "opcode": "110000",
