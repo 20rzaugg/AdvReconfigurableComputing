@@ -40,13 +40,22 @@ architecture hierarchial of dlx_decode is
         );
     end component;
 
+    component signExtend
+        port ( 
+            input : in  STD_LOGIC_VECTOR (15 downto 0);
+            us : in STD_LOGIC;
+            output : out  STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0)
+        );
+    end component;
+
 begin
 
+    opcode <= instr_in(31 downto 26);
     rs1 <= instr_in(20 downto 16);
     rs2 <= instr_in(15 downto 11);
     imm16 <= instr_in(15 downto 0);
 
-    registers : register_mem
+    register_inst : register_mem
         port map (
             clk => clk,
             read_addr1 => rs1,
@@ -57,6 +66,14 @@ begin
             read_q1 => rs1_data,
             read_q2 => rs2_data
         );
+
+    signExtend_inst : signExtend
+        port map (
+            input => imm16,
+            us => is_unsigned(opcode),
+            output => immediate
+        );
+
 
     process(clk, rst_l) begin
         if rising_edge(clk) then
