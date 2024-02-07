@@ -16,7 +16,7 @@ entity dlx_decode is
         rs2_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
         immediate : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
         instr_out : out STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
-        addr_out : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
+        addr_out : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0)
     );
 end dlx_decode;
 
@@ -44,7 +44,7 @@ architecture hierarchial of dlx_decode is
         port ( 
             input : in  STD_LOGIC_VECTOR (15 downto 0);
             us : in STD_LOGIC;
-            output : out  STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0)
+            output : out  STD_LOGIC_VECTOR (31 downto 0)
         );
     end component;
 
@@ -80,6 +80,6 @@ begin
             instr_out <= instr_in;
             addr_out <= addr_in;
         end if;
-    end
+    end process;
 
 end hierarchial;

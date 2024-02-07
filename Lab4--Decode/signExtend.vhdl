@@ -7,15 +7,18 @@ entity signExtend is
     port ( 
         input : in  STD_LOGIC_VECTOR (15 downto 0);
         us : in STD_LOGIC;
-        output : out  STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0)
+        output : out  STD_LOGIC_VECTOR (31 downto 0)
     );
-    
-    process() begin
+end signExtend;
+
+architecture behavioral of signExtend is
+begin
+    process (us, input) begin
         if us = '1' or input(15) = '0' then
-            output <= (others => '0') & input;
+            output <= x"0000" & input;
         else
-            output <= (others => '1') & input;
+            output <= x"ffff" & input;
         end if;
     end process;
 
-end signExtend;
+end behavioral;

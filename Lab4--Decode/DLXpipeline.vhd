@@ -7,6 +7,16 @@ entity DLXpipeline is
     port (
         clk : in std_logic;
         rst_l : in std_logic;
+        addr_selector : in std_logic;
+        branch_addr : in std_logic_vector(ADDR_WIDTH-1 downto 0);
+        writeback_data : in std_logic_vector(DATA_WIDTH-1 downto 0);
+        writeback_reg : in std_logic_vector(4 downto 0);
+        writeback_en : in std_logic;
+        rs1_data : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        rs2_data : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        immediate : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        instr_out : out std_logic_vector(INSTR_WIDTH-1 downto 0);
+        addr_out : out std_logic_vector(ADDR_WIDTH-1 downto 0)
     );
 end DLXpipeline;
 
@@ -36,9 +46,12 @@ architecture behavioral of DLXpipeline is
             rs2_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
             immediate : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
             instr_out : out STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
-            addr_out : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
+            addr_out : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0)
         );
     end component;
+
+    signal next_pc : std_logic_vector(ADDR_WIDTH-1 downto 0);
+    signal instr : std_logic_vector(INSTR_WIDTH-1 downto 0);
 
 begin
 

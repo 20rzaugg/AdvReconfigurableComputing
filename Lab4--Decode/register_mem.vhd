@@ -1,7 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_arith.all;
-use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 library work;
 use work.dlxlib.all;
 
@@ -29,23 +28,22 @@ architecture rtl of register_mem is
     signal ram : memory_t;
     
     -- Register to hold the address
-    signal addr_reg1 : natural range 0 to 31;
-    signal addr_reg2 : natural range 0 to 31;
+    signal addr_reg1 : integer range 0 to 31; 
+    signal addr_reg2 : integer range 0 to 31;
 
 begin
-
-    ram(0) <= (others => '0');
 
     process(clk)
     begin
         if(rising_edge(clk)) then
+            ram(0) <= (others => '0');
             if(write_en = '1' and unsigned(write_addr) > 0) then
-                ram(addr) <= write_data;
+                ram(to_integer(unsigned(write_addr))) <= write_data;
             end if;
             
             -- Register the address for reading
-            addr_reg1 <= natural(read_addr1);
-            addr_reg2 <= natural(read_addr2);
+            addr_reg1 <= to_integer(unsigned(read_addr1));
+            addr_reg2 <= to_integer(unsigned(read_addr2));
         end if;
     
     end process;
