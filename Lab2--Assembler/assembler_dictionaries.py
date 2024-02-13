@@ -14,7 +14,7 @@ instruction_set = {
                  },
      "SW":    {
                      "opcode": "000010",
-                     "operands": [(reg, 5),(reg, 5),(addr_offset, 16)]
+                     "operands": [(reg, 5),(reg, 5),(addr_offset, 16)] #TODO fix these?
                  },
      "ADD":   {
                      "opcode": "000011",
@@ -182,7 +182,7 @@ instruction_set = {
                  },
      "BNEZ":  {
                      "opcode": "101100",
-                     "operands": [(reg, 5),(unused, 5),(addr_abs, 16)]
+                     "operands": [(reg, 5),(unused, 5),(addr_abs, 16)] #TODO fix these bitorders
                  },
      "J":     {
                      "opcode": "101101",

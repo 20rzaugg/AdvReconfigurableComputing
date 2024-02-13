@@ -12,9 +12,8 @@ entity dlx_execute is
         reg_in2 : in std_logic_vector(DATA_WIDTH downto 0);
         immediate_in : in std_logic_vector(DATA_WIDTH downto 0);
         instr_in : in std_logic_vector(INSTR_WIDTH downto 0);
-        alu_result : out std_logic_vector(DATA_WIDTH downto 0);
-
-    )
+        alu_result : out std_logic_vector(DATA_WIDTH downto 0)
+    );
 end dlx_execute;
 
 architecture hierarchial of dlx_execute is
@@ -79,5 +78,10 @@ begin
             opcode => opcode
             out1 => alu_result
         );
+    
+    mux2_sel <= is_immediate(opcode);
+    
+    process (clk, rst_l)
 
+    end process
 end hierarchial;

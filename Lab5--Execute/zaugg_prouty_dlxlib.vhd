@@ -58,6 +58,7 @@ package dlxlib is
     constant JALR : std_logic_vector(5 downto 0) := "110000";
 
     function is_unsigned(opcode : std_logic_vector(5 downto 0)) return std_logic;
+    function is_immediate(opcode : std_logic_vector(5 downto 0)) return std_logic;
 
 end package dlxlib;
 
@@ -67,6 +68,19 @@ package body dlxlib is
         if opcode = ADDU or opcode = ADDUI or opcode = SUBU or opcode = SUBUI or opcode = SLTU or
            opcode = SLTUI or opcode = SGTU or opcode = SGTUI or opcode = SLEU or opcode = SLEUI or
            opcode = SGEU or opcode = SGEUI then 
+            return '1';
+        else
+            return '0';
+        end if;
+    end function;
+
+    function is_immediate(opcode : std_logic_vector(5 downto 0)) return std_logic is
+    begin
+        if opcode = ADDI or opcode = ADDUI or opcode = SUBI or opcode = SUBUI or opcode = ANDI or
+           opcode = ORI or opcode = XORI or opcode = SLLI or opcode = SRLI or opcode = SRAI or
+           opcode = SLTI or opcode = SLTUI or opcode = SGTI or opcode = SGTUI or opcode = SLEI or
+           opcode = SLEUI or opcode = SGEI or opcode = SGEUI or opcode = SEQI or opcode = SNEI or
+           opcode = BEQZ or opcode = BNEZ then 
             return '1';
         else
             return '0';
