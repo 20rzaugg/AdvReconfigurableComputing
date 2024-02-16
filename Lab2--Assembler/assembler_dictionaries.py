@@ -178,11 +178,11 @@ instruction_set = {
                  },
      "BEQZ":  {
                      "opcode": "101011",
-                     "operands": [(reg, 5),(unused, 5),(addr_abs, 16)]
+                     "operands": [(unused, 5)(reg, 5),(addr_abs, 16)]
                  },
      "BNEZ":  {
                      "opcode": "101100",
-                     "operands": [(reg, 5),(unused, 5),(addr_abs, 16)] #TODO fix these bitorders
+                     "operands": [(unused, 5),(reg, 5),(addr_abs, 16)]
                  },
      "J":     {
                      "opcode": "101101",

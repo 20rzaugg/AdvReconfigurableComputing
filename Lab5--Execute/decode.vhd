@@ -48,6 +48,8 @@ architecture hierarchial of dlx_decode is
         );
     end component;
 
+    signal next_immediate : STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
+
 begin
 
     opcode <= instr_in(31 downto 26);
@@ -71,7 +73,7 @@ begin
         port map (
             input => imm16,
             us => is_unsigned(opcode),
-            output => immediate
+            output => next_immediate
         );
 
 
@@ -79,6 +81,7 @@ begin
         if rising_edge(clk) then
             instr_out <= instr_in;
             addr_out <= addr_in;
+            immediate <= next_immediate;
         end if;
     end process;
 

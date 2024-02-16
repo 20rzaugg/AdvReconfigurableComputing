@@ -10,25 +10,25 @@ package dlxlib is
     constant NOOP : std_logic_vector(5 downto 0) := "000000";
     constant LW : std_logic_vector(5 downto 0) := "000001";
     constant SW : std_logic_vector(5 downto 0) := "000010";
-    constant ADD : std_logic_vector(5 downto 0) := "000011";
+    constant ADDx : std_logic_vector(5 downto 0) := "000011";
     constant ADDI : std_logic_vector(5 downto 0) := "000100";
     constant ADDU : std_logic_vector(5 downto 0) := "000101";
     constant ADDUI : std_logic_vector(5 downto 0) := "000110";
-    constant SUB : std_logic_vector(5 downto 0) := "000111";
+    constant SUBx : std_logic_vector(5 downto 0) := "000111";
     constant SUBI : std_logic_vector(5 downto 0) := "001000";
     constant SUBU : std_logic_vector(5 downto 0) := "001001";
     constant SUBUI : std_logic_vector(5 downto 0) := "001010";
-    constant AND_ : std_logic_vector(5 downto 0) := "001011";
+    constant ANDx : std_logic_vector(5 downto 0) := "001011";
     constant ANDI : std_logic_vector(5 downto 0) := "001100";
-    constant OR_ : std_logic_vector(5 downto 0) := "001101";
+    constant ORx : std_logic_vector(5 downto 0) := "001101";
     constant ORI : std_logic_vector(5 downto 0) := "001110";
-    constant XOR_ : std_logic_vector(5 downto 0) := "001111";
+    constant XORx : std_logic_vector(5 downto 0) := "001111";
     constant XORI : std_logic_vector(5 downto 0) := "010000";
-    constant SLL_ : std_logic_vector(5 downto 0) := "010001";
+    constant SLLx : std_logic_vector(5 downto 0) := "010001";
     constant SLLI : std_logic_vector(5 downto 0) := "010010";
-    constant SRL_ : std_logic_vector(5 downto 0) := "010011";
+    constant SRLx : std_logic_vector(5 downto 0) := "010011";
     constant SRLI : std_logic_vector(5 downto 0) := "010100";
-    constant SRA_ : std_logic_vector(5 downto 0) := "010101";
+    constant SRAx : std_logic_vector(5 downto 0) := "010101";
     constant SRAI : std_logic_vector(5 downto 0) := "010110";
     constant SLT : std_logic_vector(5 downto 0) := "010111";
     constant SLTI : std_logic_vector(5 downto 0) := "011000";
@@ -59,6 +59,11 @@ package dlxlib is
 
     function is_unsigned(opcode : std_logic_vector(5 downto 0)) return std_logic;
     function is_immediate(opcode : std_logic_vector(5 downto 0)) return std_logic;
+    function is_link(opcode : std_logic_vector(5 downto 0)) return std_logic;
+    function arithmetic_right_shift(
+        input_data : in std_logic_vector;
+        shift_amt : in integer range 0 to DATA_WIDTH-1)
+        return std_logic_vector;
 
 end package dlxlib;
 
@@ -80,10 +85,39 @@ package body dlxlib is
            opcode = ORI or opcode = XORI or opcode = SLLI or opcode = SRLI or opcode = SRAI or
            opcode = SLTI or opcode = SLTUI or opcode = SGTI or opcode = SGTUI or opcode = SLEI or
            opcode = SLEUI or opcode = SGEI or opcode = SGEUI or opcode = SEQI or opcode = SNEI or
-           opcode = BEQZ or opcode = BNEZ then 
+           opcode = BEQZ or opcode = BNEZ or opcode = J or opcode = JAL then 
             return '1';
         else
             return '0';
         end if;
     end function;
+
+    function is_link(opcode : std_logic_vector(5 downto 0)) return std_logic is
+    begin
+        if opcode = JAL or opcode = JALR then
+            return '1';
+        else
+            return '0';
+        end if;
+    end;
+
+    function arithmetic_right_shift(
+        input_data : in std_logic_vector;
+        shift_amt : in integer range 0 to DATA_WIDTH-1)
+        return std_logic_vector is
+        variable temp : std_logic_vector(DATA_WIDTH-1 downto 0);
+        variable k : std_logic;
+    begin
+        -- Perform arithmetic right shift
+        if shift_amt > 0 then
+            temp := input_data;
+            for i in 0 to shift_amt-1 loop
+                k := temp(temp'high); -- Preserve sign bit
+                temp := temp(0) & temp(temp'high downto 1);
+            end loop;
+            return temp;
+        else
+            return input_data; -- No shift if shift_amt is negative
+        end if;
+    end arithmetic_right_shift;
 end package body;

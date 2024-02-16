@@ -35,8 +35,10 @@ architecture hierarchial of dlx_fetch is
         );
     end component addr_adder;
     
-    component mux2_1 is
-        parameter MUX_WIDTH : integer := 32;
+    component MUX2_1 is
+        generic (
+             MUX_WIDTH : integer := ADDR_WIDTH
+        );
         port (
             sel : in std_logic;
             in0 : in std_logic_vector(MUX_WIDTH-1 downto 0);
@@ -68,7 +70,9 @@ begin
         );
 
     mux_inst : mux2_1
-        parameter MUX_WIDTH => ADDR_WIDTH;
+        generic map (
+            MUX_WIDTH => ADDR_WIDTH
+        )
         port map (
             sel => addr_selector,
             in0 => std_logic_vector(mux_in),
