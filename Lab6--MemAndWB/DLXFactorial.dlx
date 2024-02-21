@@ -1,0 +1,39 @@
+.data
+	n 1 3
+	f 1 0
+.text
+	LW R1, n(R0)
+	ADDI R2, R0, 0
+	ADDI R3, R0, 0
+	LW R10, n(R0)
+
+top
+	SLEI R11, R10, 1
+	NOP
+	NOP
+	NOP
+	BNEZ R11, exit
+	ADDI R3, R1, 0
+	SUBI R2, R10, 1
+	JAL mult
+	SUBI R10, R10, 1
+	J top
+
+;Function call to multiply registers
+mult
+	SLEI R11, R2, 1
+	NOP
+	NOP
+	NOP
+	BNEZ R11, end
+	ADD R1, R1, R3
+	SUBI R2, R2, 1
+	J mult
+end 
+	JR R31
+
+exit
+	SW f(R0), R1
+done
+	NOP
+	J done
