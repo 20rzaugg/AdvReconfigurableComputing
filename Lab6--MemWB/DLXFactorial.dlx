@@ -23,6 +23,7 @@ top
 	JAL mult
 	NOOP
 	NOOP
+	NOOP
 	SUBI R10, R10, 1
 	J top
 	NOOP

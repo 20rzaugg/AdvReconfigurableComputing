@@ -96,9 +96,9 @@ package body dlxlib is
     function is_link(opcode : std_logic_vector(5 downto 0)) return std_logic is
     begin
         if opcode = JAL or opcode = JALR then
-            return '1';
-        else
             return '0';
+        else
+            return '1';
         end if;
     end;
 

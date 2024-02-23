@@ -182,7 +182,7 @@ begin
             when JR =>
                 next_out1 <= in1;
             when JAL =>
-                next_out1 <= in2;
+                next_out1 <= in1;
             when JALR =>
                 next_out1 <= in1;
             when others =>

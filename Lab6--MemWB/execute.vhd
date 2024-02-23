@@ -13,6 +13,7 @@ entity dlx_execute is
         immediate_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
         instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
         alu_result : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
+        branch_target : out std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
         branch_taken : out std_logic := '0';
         instr_out : out std_logic_vector(INSTR_WIDTH-1 downto 0);
         reg2_out : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0')
@@ -52,6 +53,7 @@ architecture hierarchial of dlx_execute is
 
     signal opcode : std_logic_vector(5 downto 0);
 
+    signal next_branch_target : std_logic_vector(ADDR_WIDTH-1 downto 0);
     signal next_branch_taken : std_logic;
 
     signal expanded_address : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -104,6 +106,7 @@ begin
             branch_taken <= '0';
             instr_out <= (others => '0');
         elsif (rising_edge(clk)) then
+            branch_target <= next_branch_target;
             branch_taken <= next_branch_taken;
             instr_out <= instr_in;
             reg2_out <= reg_in2;            
@@ -116,6 +119,13 @@ begin
             next_branch_taken <= '1';
         else
             next_branch_taken <= '0';
+        end if;
+        if opcode = BEQZ or opcode = BNEZ or opcode = J or opcode = JAL then
+            next_branch_target <= immediate_in(ADDR_WIDTH-1 downto 0);
+        elsif opcode = JR or opcode = JALR then
+            next_branch_target <= reg_in1(ADDR_WIDTH-1 downto 0);
+        else
+            next_branch_target <= (others => '0');
         end if;
     end process;
 

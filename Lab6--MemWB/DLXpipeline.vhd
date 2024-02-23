@@ -50,6 +50,7 @@ architecture behavioral of DLXpipeline is
             immediate_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
             instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
             alu_result : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
+            branch_target : out std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
             branch_taken : out std_logic := '0';
             instr_out : out std_logic_vector(INSTR_WIDTH-1 downto 0) := (others => '0');
             reg2_out : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0')
@@ -95,6 +96,8 @@ architecture behavioral of DLXpipeline is
     signal addr_selector : std_logic;
 
     signal execute_alu_result : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal branch_target : std_logic_vector(ADDR_WIDTH-1 downto 0);
+
     signal reg2_out : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal memory_alu_result_out : std_logic_vector(DATA_WIDTH-1 downto 0);
 
@@ -114,7 +117,7 @@ begin
             clk => clk, --from system
             rst_l => rst_l, --from system
             addr_selector => addr_selector, --from execute
-            branch_addr => execute_alu_result(ADDR_WIDTH-1 downto 0), --from execute
+            branch_addr => branch_target, --from execute
             next_pc => fetch_next_pc, --to decode
             instr => fetch_next_instr --to decode
         );
@@ -145,6 +148,7 @@ begin
             immediate_in => decode_immediate_out, --from decode
             instr_in => decode_next_instr, --from decode
             alu_result => execute_alu_result, --to memory and decode
+            branch_target => branch_target, --to fetch
             branch_taken => addr_selector, --to fetch
             instr_out => execute_next_instr, --to fetch
             reg2_out => reg2_out --to memory
