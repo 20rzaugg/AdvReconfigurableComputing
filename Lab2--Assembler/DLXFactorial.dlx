@@ -1,5 +1,5 @@
 .data
-	n 1 3
+	n 1 6
 	f 1 0
 .text
 	LW R1, n(R0)

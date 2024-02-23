@@ -82,25 +82,43 @@ BEGIN\n\n""")
                 if k:
                     K = k[0].upper()
                     if K in instruction_set.keys():
-                        b = instruction_set[K]["opcode"]
+                        b = "00000000000000000000000000000000"
+                        b = instruction_set[K]["opcode"] + b[6:]
                         arg = 1
                         for i in instruction_set[K]["operands"]:
-                            if i[0] == reg:
+                            if i[0] == dest_reg:
                                 if k[arg].upper() in register_set.keys():
-                                    b += register_set[k[arg].upper()]
+                                    b = b[0:6] + register_set[k[arg].upper()] + b[11:]
+                                    arg += 1
+                                else:
+                                    print("Error: Invalid register name\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
+                                    exit(1)
+                            elif i[0] == src_reg1:
+                                if k[arg].upper() in register_set.keys():
+                                    b = b[0:11] + register_set[k[arg].upper()] + b[16:]
+                                    arg += 1
+                                else:
+                                    print("Error: Invalid register name\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
+                                    exit(1)
+                            elif i[0] == src_reg2:
+                                if k[arg].upper() in register_set.keys():
+                                    b = b[16:21] + register_set[k[arg].upper()] + b[21:]
                                     arg += 1
                                 else:
                                     print("Error: Invalid register name\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                                     exit(1)
                             elif i[0] == imm:
                                 if k[arg] in data_memory_table.keys():
-                                    b += format(data_memory_table[k[arg]][0], '016b')
+                                    b = b[0:16] + format(data_memory_table[k[arg]][0], '016b')
+                                    arg += 1
+                                elif k[arg].upper() in instruction_memory_table.keys():
+                                    b = b[0:16] + format(instruction_memory_table[k[arg].upper()], '016b')
                                     arg += 1
                                 else:
                                     try:
                                         x = int(k[arg])
                                         if x >= 0 and x < 65536:
-                                            b += format(x, '016b')
+                                            b = b[0:16] + format(x, '016b')
                                             arg += 1
                                         else:
                                             print("Error: Immediate out of range\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
@@ -108,37 +126,8 @@ BEGIN\n\n""")
                                     except ValueError:
                                         print("Error: Unknown variable immediate\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                                         exit(1)
-                            elif i[0] == addr_abs:
-                                if k[arg].upper() in instruction_memory_table.keys():
-                                    b += format(instruction_memory_table[k[arg].upper()], '0{}b'.format(i[1]))
-                                    arg += 1
-                                else:
-                                    try:
-                                        x = int(k[arg])
-                                        if x >= 0 and x < 2097152:
-                                            b += format(x, '021b')
-                                            arg += 1
-                                        else:
-                                            print("Error: Address out of range\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
-                                            exit(1)
-                                    except ValueError:
-                                        print("Error: Unknown variable address\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
-                                        exit(1)
-                            elif i[0] == addr_offset:
-                                if k[arg] in data_memory_table.keys():
-                                    b += format(data_memory_table[k[arg]][0], '016b')
-                                    arg += 1
-                                else:
-                                    try:
-                                        x = int(k[arg])
-                                        if x >= 0 and x < 65536:
-                                            b += format(x, '016b')
-                                            arg += 1
-                                    except ValueError:
-                                        print("Error: Unknown variable address\nline "+str(line_number) + ": " + line)
-                                        exit(1)
-                            elif i[0] == unused:
-                                b += '0'*i[1]
+                            else:
+                                pass
                         x = format(int(b,2),'08X')
                         a = format(instruction_address, '03X')
                         output_file.write(a + " : " + x + ";\t\t-- " + line.replace('\t\t',' ') + "\n")
