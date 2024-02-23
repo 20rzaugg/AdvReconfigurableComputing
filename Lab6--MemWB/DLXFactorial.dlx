@@ -28,6 +28,7 @@ top
 	J top
 	NOOP
 	NOOP
+	NOOP
 
 ;Function call to multiply registers
 mult
@@ -38,13 +39,16 @@ mult
 	BNEZ R11, end
 	NOOP
 	NOOP
+	NOOP
 	ADD R1, R1, R3
 	SUBI R2, R2, 1
 	J mult
 	NOOP
 	NOOP
+	NOOP
 end 
 	JR R31
+	NOOP
 	NOOP
 	NOOP
 
@@ -53,5 +57,6 @@ exit
 done
 	NOOP
 	J done
+	NOOP
 	NOOP
 	NOOP
