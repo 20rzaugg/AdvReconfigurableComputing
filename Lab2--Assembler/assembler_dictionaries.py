@@ -18,7 +18,7 @@ instruction_set = {
                  },
      "ADD":   {
                      "opcode": "000011",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5),(unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5),(unused, 11)]
                  },
      "ADDI":  {
                      "opcode": "000100",
@@ -26,7 +26,7 @@ instruction_set = {
                  },
      "ADDU":  {
                      "opcode": "000101",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5),(unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5),(unused, 11)]
                  },
      "ADDUI": {
                      "opcode": "000110",
@@ -34,7 +34,7 @@ instruction_set = {
                  },
      "SUB":   {
                      "opcode": "000111",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5),(unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5),(unused, 11)]
                  },
      "SUBI":  {
                      "opcode": "001000",
@@ -42,7 +42,7 @@ instruction_set = {
                  },
      "SUBU":  {
                      "opcode": "001001",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5),(unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5),(unused, 11)]
                  },
      "SUBUI": {
                      "opcode": "001010",
@@ -50,7 +50,7 @@ instruction_set = {
                  },
      "AND":   {
                      "opcode": "001011",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5),(unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5),(unused, 11)]
                  },
      "ANDI":  {
                      "opcode": "001100",
@@ -58,7 +58,7 @@ instruction_set = {
                  },
      "OR":    {
                      "opcode": "001101",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5),(unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5),(unused, 11)]
                  },
      "ORI":   {
                      "opcode": "001110",
@@ -66,7 +66,7 @@ instruction_set = {
                  },
      "XOR":   {
                      "opcode": "001111",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5),(unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5),(unused, 11)]
                  },
      "XORI":  {
                      "opcode": "010000",
@@ -74,7 +74,7 @@ instruction_set = {
                  },
      "SLL":   {
                      "opcode": "010001",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5),(unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5),(unused, 11)]
                  },
      "SLLI":  {
                      "opcode": "010010",
@@ -82,7 +82,7 @@ instruction_set = {
                  },
      "SRL":   {
                      "opcode": "010011",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SRLI":  {
                      "opcode": "010100",
@@ -90,7 +90,7 @@ instruction_set = {
                  },
      "SRA":   {
                      "opcode": "010101",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SRAI":  {
                      "opcode": "010110",
@@ -98,7 +98,7 @@ instruction_set = {
                  },
      "SLT":   {
                      "opcode": "010111",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SLTI":  {
                      "opcode": "011000",
@@ -106,7 +106,7 @@ instruction_set = {
                  },
      "SLTU":  {
                      "opcode": "011001",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SLTUI": {
                      "opcode": "011010",
@@ -114,7 +114,7 @@ instruction_set = {
                  },
      "SGT":   {
                      "opcode": "011011",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SGTI":  {
                      "opcode": "011100",
@@ -122,7 +122,7 @@ instruction_set = {
                  },
      "SGTU":  {
                      "opcode": "011101",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SGTUI": {
                      "opcode": "011110",
@@ -130,7 +130,7 @@ instruction_set = {
                  },
      "SLE":   {
                      "opcode": "011111",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SLEI":  {
                      "opcode": "100000",
@@ -138,7 +138,7 @@ instruction_set = {
                  },
      "SLEU":  {
                      "opcode": "100001",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SLEUI": {
                      "opcode": "100010",
@@ -146,7 +146,7 @@ instruction_set = {
                  },
      "SGE":   {
                      "opcode": "100011",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SGEI":  {
                      "opcode": "100100",
@@ -154,7 +154,7 @@ instruction_set = {
                  },
      "SGEU":  {
                      "opcode": "100101",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SGEUI": {
                      "opcode": "100110",
@@ -162,7 +162,7 @@ instruction_set = {
                  },
      "SEQ":   {
                      "opcode": "100111",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SEQI":  {
                      "opcode": "101000",
@@ -170,7 +170,7 @@ instruction_set = {
                  },
      "SNE":   {
                      "opcode": "101001",
-                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg1, 5), (unused, 11)]
+                     "operands": [(dest_reg, 5),(src_reg1, 5),(src_reg2, 5), (unused, 11)]
                  },
      "SNEI":  {
                      "opcode": "101010",

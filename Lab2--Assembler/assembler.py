@@ -102,7 +102,7 @@ BEGIN\n\n""")
                                     exit(1)
                             elif i[0] == src_reg2:
                                 if k[arg].upper() in register_set.keys():
-                                    b = b[16:21] + register_set[k[arg].upper()] + b[21:]
+                                    b = b[0:16] + register_set[k[arg].upper()] + b[21:]
                                     arg += 1
                                 else:
                                     print("Error: Invalid register name\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
