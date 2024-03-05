@@ -26,6 +26,9 @@ architecture hierarchial of dlx_decode is
     signal rs1 : STD_LOGIC_VECTOR (4 downto 0);
     signal rs2 : STD_LOGIC_VECTOR (4 downto 0);
     signal imm16 : STD_LOGIC_VECTOR (15 downto 0);
+    signal EX_instr : STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0) := (others => '0');
+    signal MEM_instr : STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0) := (others => '0');
+    signal WB_instr : STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0) := (others => '0');
 
     component register_mem
         port (
@@ -55,6 +58,8 @@ begin
     opcode <= instr_in(31 downto 26);
     rs1 <= instr_in(20 downto 16);
     imm16 <= instr_in(15 downto 0);
+    EX_instr <= instr_out;
+
 
     process(opcode) begin
         if opcode = SW then
@@ -86,10 +91,17 @@ begin
 
     process(clk, rst_l) begin
         if rising_edge(clk) then
+            WB_instr <= MEM_instr;
+            MEM_instr <= EX_instr;
             instr_out <= instr_in;
             addr_out <= addr_in;
             immediate <= next_immediate;
         end if;
+    end process;
+
+    process(instr_in, EX_instr, MEM_instr, WB_instr, rs1, rs2) begin
+        if rs1 = EX_instr(25 downto 21) then
+            
     end process;
 
 end hierarchial;
