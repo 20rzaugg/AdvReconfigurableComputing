@@ -7,15 +7,15 @@ entity dlx_execute is
     port (
         clk : in std_logic;
         rst_l : in std_logic;
-        addr_in : in std_logic_vector(ADDR_WIDTH-1 downto 0);
+        execute_pc : in std_logic_vector(ADDR_WIDTH-1 downto 0);
         reg_in1 : in std_logic_vector(DATA_WIDTH-1 downto 0);
         reg_in2 : in std_logic_vector(DATA_WIDTH-1 downto 0);
         immediate_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
-        instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
+        execute_instr : in std_logic_vector(INSTR_WIDTH-1 downto 0);
         alu_result : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
         branch_target : out std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
         branch_taken : out std_logic := '0';
-        instr_out : out std_logic_vector(INSTR_WIDTH-1 downto 0);
+        memory_instr : out std_logic_vector(INSTR_WIDTH-1 downto 0);
         reg2_out : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0')
     );
 end dlx_execute;
@@ -33,7 +33,7 @@ architecture hierarchial of dlx_execute is
         );
     end component ALU;
     
-    component MUX2_1 is
+    component MUX5_1 is
         generic (
              MUX_WIDTH : integer := DATA_WIDTH
         );
@@ -41,12 +41,15 @@ architecture hierarchial of dlx_execute is
             sel : in std_logic;
             in0 : in std_logic_vector(MUX_WIDTH-1 downto 0);
             in1 : in std_logic_vector(MUX_WIDTH-1 downto 0);
+            in2 : in std_logic_vector(MUX_WIDTH-1 downto 0);
+            in3 : in std_logic_vector(MUX_WIDTH-1 downto 0);
+            in4 : in std_logic_vector(MUX_WIDTH-1 downto 0);
             out0 : out std_logic_vector(MUX_WIDTH-1 downto 0)
         );
     end component mux2_1;
 
-    signal mux1_sel : std_logic;
-    signal mux2_sel : std_logic;
+    signal mux1_sel : std_logic_vector(2 downto 0);
+    signal mux2_sel : std_logic_vector(2 downto 0);
 
     signal alu_in1 : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal alu_in2 : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -60,10 +63,10 @@ architecture hierarchial of dlx_execute is
 
 begin
 
-    opcode <= instr_in(31 downto 26);
-    expanded_address <= "0000000000000000000000" & addr_in;
+    opcode <= execute_instr(31 downto 26);
+    expanded_address <= "0000000000000000000000" & execute_pc;
 
-    muxinput1 : MUX2_1
+    muxinput1 : MUX5_1
         generic map (
             MUX_WIDTH => DATA_WIDTH
         )
@@ -71,10 +74,13 @@ begin
             sel => mux1_sel,
             in0 => expanded_address,
             in1 => reg_in1,
+            in2 =>
+            in3 =>
+            in4 =>
             out0 => alu_in1
         );
 
-    muxinput2 : MUX2_1
+    muxinput2 : MUX5_1
         generic map (
             MUX_WIDTH => DATA_WIDTH
         )
@@ -82,6 +88,9 @@ begin
             sel => mux2_sel,
             in0 => reg_in2,
             in1 => immediate_in,
+            in2 =>
+            in3 =>
+            in4 =>
             out0 => alu_in2
         );
 
@@ -95,11 +104,14 @@ begin
             out1 => alu_result
         );
     
-    
-    mux1_sel <= is_link(opcode);
-    mux2_sel <= is_immediate(opcode);
+    --mux1_sel <= is_link(opcode);
+    --mux2_sel <= is_immediate(opcode);
+    process(opcode, ) begin
+        --mux1_sel = ?????????
+        --mux2_sel = ?????????
+    end process
 
-    
+
     process (clk, rst_l) is
     begin
         if (rst_l = '0') then
@@ -108,7 +120,7 @@ begin
         elsif (rising_edge(clk)) then
             branch_target <= next_branch_target;
             branch_taken <= next_branch_taken;
-            instr_out <= instr_in;
+            instr_out <= execute_instr;
             reg2_out <= reg_in2;            
         end if;
     end process;

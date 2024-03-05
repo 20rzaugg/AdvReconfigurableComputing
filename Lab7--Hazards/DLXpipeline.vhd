@@ -18,7 +18,7 @@ architecture behavioral of DLXpipeline is
             rst_l : in std_logic;
             addr_selector : in std_logic;
             branch_addr : in std_logic_vector(ADDR_WIDTH-1 downto 0);
-            next_pc : out std_logic_vector(ADDR_WIDTH-1 downto 0);
+            decode_pc : out std_logic_vector(ADDR_WIDTH-1 downto 0);
             instr : out std_logic_vector(INSTR_WIDTH-1 downto 0)
         );
     end component;
@@ -27,16 +27,16 @@ architecture behavioral of DLXpipeline is
         port (
             clk : in  STD_LOGIC;
             rst_l : in  STD_LOGIC := '0';
-            addr_in : in STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
-            instr_in : in STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
+            decode_pc : in STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
+            decode_instr : in STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
             writeback_data : in STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
             writeback_reg : in STD_LOGIC_VECTOR (4 downto 0);
             writeback_en : in STD_LOGIC;
             rs1_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
             rs2_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
             immediate : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
-            instr_out : out STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
-            addr_out : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0)
+            execute_instr : out STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
+            execute_pc : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0)
         );
     end component;
 
@@ -44,15 +44,15 @@ architecture behavioral of DLXpipeline is
         port (
             clk : in std_logic;
             rst_l : in std_logic;
-            addr_in : in std_logic_vector(ADDR_WIDTH-1 downto 0);
+            execute_pc : in std_logic_vector(ADDR_WIDTH-1 downto 0);
             reg_in1 : in std_logic_vector(DATA_WIDTH-1 downto 0);
             reg_in2 : in std_logic_vector(DATA_WIDTH-1 downto 0);
             immediate_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
-            instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
+            execute_instr : in std_logic_vector(INSTR_WIDTH-1 downto 0);
             alu_result : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
             branch_target : out std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
             branch_taken : out std_logic := '0';
-            instr_out : out std_logic_vector(INSTR_WIDTH-1 downto 0) := (others => '0');
+            memory_instr : out std_logic_vector(INSTR_WIDTH-1 downto 0) := (others => '0');
             reg2_out : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0')
         );
     end component;
@@ -81,8 +81,9 @@ architecture behavioral of DLXpipeline is
         );
     end component;
 
-    signal fetch_next_pc : std_logic_vector(ADDR_WIDTH-1 downto 0); -- fetch to decode
-    signal fetch_next_instr : std_logic_vector(INSTR_WIDTH-1 downto 0); -- fetch to decode
+    
+    signal fetch_pc : std_logic_vector(ADDR_WIDTH-1 downto 0); -- fetch to decode
+    signal fetch_instr : std_logic_vector(INSTR_WIDTH-1 downto 0); -- fetch to decode
 
     signal decode_next_pc : std_logic_vector(ADDR_WIDTH-1 downto 0); -- decode to execute
     signal decode_next_instr : std_logic_vector(INSTR_WIDTH-1 downto 0); -- decode to execute

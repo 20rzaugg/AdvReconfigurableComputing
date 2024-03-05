@@ -7,16 +7,20 @@ entity dlx_decode is
     Port ( 
         clk : in  STD_LOGIC;
         rst_l : in  STD_LOGIC := '0';
-        addr_in : in STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
-        instr_in : in STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
+        decode_pc : in STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
+        decode_instr : in STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
         writeback_data : in STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
         writeback_reg : in STD_LOGIC_VECTOR (4 downto 0);
         writeback_en : in STD_LOGIC;
         rs1_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
         rs2_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
         immediate : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
-        instr_out : out STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
-        addr_out : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0)
+        execute_instr : inout STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
+        memory_instr : in STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
+        execute_pc : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
+        bubble : inout STD_LOGIC := '0';
+        top_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
+        bottom_data_hazard : out STD_LOGIC_VECTOR (1 downto 0)
     );
 end dlx_decode;
 
@@ -26,9 +30,6 @@ architecture hierarchial of dlx_decode is
     signal rs1 : STD_LOGIC_VECTOR (4 downto 0);
     signal rs2 : STD_LOGIC_VECTOR (4 downto 0);
     signal imm16 : STD_LOGIC_VECTOR (15 downto 0);
-    signal EX_instr : STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0) := (others => '0');
-    signal MEM_instr : STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0) := (others => '0');
-    signal WB_instr : STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0) := (others => '0');
 
     component register_mem
         port (
@@ -55,17 +56,16 @@ architecture hierarchial of dlx_decode is
 
 begin
 
-    opcode <= instr_in(31 downto 26);
-    rs1 <= instr_in(20 downto 16);
-    imm16 <= instr_in(15 downto 0);
-    EX_instr <= instr_out;
+    opcode <= decode_instr(31 downto 26);
+    rs1 <= decode_instr(20 downto 16);
+    imm16 <= decode_instr(15 downto 0);
 
 
     process(opcode) begin
         if opcode = SW then
-            rs2 <= instr_in(25 downto 21);
+            rs2 <= decode_instr(25 downto 21);
         else
-            rs2 <= instr_in(15 downto 11);
+            rs2 <= decode_instr(15 downto 11);
         end if;
     end process;
 
@@ -91,17 +91,47 @@ begin
 
     process(clk, rst_l) begin
         if rising_edge(clk) then
-            WB_instr <= MEM_instr;
-            MEM_instr <= EX_instr;
-            instr_out <= instr_in;
-            addr_out <= addr_in;
-            immediate <= next_immediate;
+            if bubble = '0' then
+                execute_instr <= decode_instr;
+                execute_pc <= decode_pc;
+                immediate <= next_immediate;
+            else then
+                execute_instr <= (others => '0');
+                execute_pc <= (others => '0');
+                immediate <= (others => '0');
+            end if;
         end if;
     end process;
 
-    process(instr_in, EX_instr, MEM_instr, WB_instr, rs1, rs2) begin
-        if rs1 = EX_instr(25 downto 21) then
-            
+    -- add output data hazard detection
+
+    process(decode_instr, execute_instr, memory_instr, rs1, rs2) begin
+        bubble <= '0'
+        -- check for data hazards in src1
+        if rs1 = execute_instr(25 downto 21) and execute_instr(31 downto 26) = LW then
+            bubble <= '1';
+        elsif rs1 = execute_instr(25 downto 21) and has_writeback(execute_instr(31 downto 26) = '1') then
+            top_data_hazard <= RBW_EXMEM;
+        elsif rs1 = memory_instr(25 downto 21) and memory_instr(31 downto 26) = LW then
+            top_data_hazard <= RBW_MEMWB_MEM;
+        elsif rs1 = memory_instr(25 downto 21) and has_writeback(memory_instr(31 downto 26) = '1') then
+            top_data_hazard <= RBW_MEMWB_ALU;
+        else then
+            top_data_hazard <= NO_HAZARD;
+        end if;
+
+        -- check for data hazards in src2
+        if rs2 = execute_instr(25 downto 21) and execute_instr(31 downto 26) = LW and is_immediate(opcode) = '0' then
+            bubble <= '1';
+        elsif rs2 = execute_instr(25 downto 21) and has_writeback(execute_instr(31 downto 26) = '1') and is_immediate(opcode) = '0' then
+            bottom_data_hazard <= RBW_EXMEM;
+        elsif rs2 = memory_instr(25 downto 21) and memory_instr(31 downto 26) = LW and is_immediate(opcode) = '0' then
+            bottom_data_hazard <= RBW_MEMWB_MEM;
+        elsif rs2 = memory_instr(25 downto 21) and has_writeback(memory_instr(31 downto 26) = '1') and is_immediate(opcode) = '0' then
+            bottom_data_hazard <= RBW_MEMWB_ALU;
+        else then
+            bottom_data_hazard <= NO_HAZARD;
+        end if;  
     end process;
 
 end hierarchial;

@@ -11,7 +11,7 @@ entity dlx_fetch is
         rst_l : in std_logic;
         addr_selector : in std_logic;
         branch_addr : in std_logic_vector(ADDR_WIDTH-1 downto 0);
-        next_pc : out std_logic_vector(ADDR_WIDTH-1 downto 0);
+        decode_pc : out std_logic_vector(ADDR_WIDTH-1 downto 0);
         instr : out std_logic_vector(INSTR_WIDTH-1 downto 0)
     );
 end entity dlx_fetch;
@@ -47,13 +47,11 @@ architecture hierarchial of dlx_fetch is
         );
     end component mux2_1;
 
-    signal pc : std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
     signal mux_in : unsigned(ADDR_WIDTH-1 downto 0);
-    signal nPC : std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
+    signal pc : std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
 
 begin
 
-    next_pc <= pc;
 
     instr_mem_inst : instruction_mem
         port map (
@@ -77,14 +75,14 @@ begin
             sel => addr_selector,
             in0 => std_logic_vector(mux_in),
             in1 => branch_addr,
-            out0 => nPC
+            out0 => pc
         );
     
     process (clk, rst_l) begin
         if rst_l = '0' then
             pc <= (others => '0');
         elsif rising_edge(clk) then
-            pc <= nPC;
+            decode_pc <= pc;
         end if;
     end process;
 end architecture hierarchial;

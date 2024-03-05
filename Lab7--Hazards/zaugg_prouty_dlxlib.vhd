@@ -57,6 +57,11 @@ package dlxlib is
     constant JAL : std_logic_vector(5 downto 0) := "101111";
     constant JALR : std_logic_vector(5 downto 0) := "110000";
 
+    constant NO_HAZARD : std_logic_vector(1 downto 0) := "00";
+    constant RBW_EXMEM : std_logic_vector(1 downto 0) := "01";
+    constant RBW_MEMWB_ALU : std_logic_vector(1 downto 0) := "10";
+    constant RBW_MEMWB_MEM : std_logic_vector(1 downto 0) := "11";
+
     function is_unsigned(opcode : std_logic_vector(5 downto 0)) return std_logic;
     function is_immediate(opcode : std_logic_vector(5 downto 0)) return std_logic;
     function is_link(opcode : std_logic_vector(5 downto 0)) return std_logic;
