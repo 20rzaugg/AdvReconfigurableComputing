@@ -158,19 +158,19 @@ begin
         end if;
     end process;
 
-    process (opcode, reg_in1) is
+    process (opcode, reg1_ff) is
     begin
-        if (opcode = BEQZ and reg1_ff = x"00000000") or (opcode = BNEZ and reg1_ff /= x"00000000") or opcode = J or opcode = JR or opcode = JAL or opcode = JALR then
-            branch_taken <= '1';
-        else
-            branch_taken <= '0';
-        end if;
         if opcode = BEQZ or opcode = BNEZ or opcode = J or opcode = JAL then
             branch_target <= immediate_in(ADDR_WIDTH-1 downto 0);
         elsif opcode = JR or opcode = JALR then
             branch_target <= reg1_ff(ADDR_WIDTH-1 downto 0);
         else
             branch_target <= (others => '0');
+        end if;
+        if (opcode = BEQZ and reg1_ff = x"00000000") or (opcode = BNEZ and reg1_ff /= x"00000000") or opcode = J or opcode = JR or opcode = JAL or opcode = JALR then
+            branch_taken <= '1';
+        else
+            branch_taken <= '0';
         end if;
     end process;
 
