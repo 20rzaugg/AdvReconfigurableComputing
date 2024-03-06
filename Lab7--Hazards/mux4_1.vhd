@@ -29,6 +29,8 @@ begin
                 out0 <= in2;
             when "11" =>
                 out0 <= in3;
+            when others =>
+                out0 <= (others => 'X');
         end case;
     end process;
 end Behavioral;

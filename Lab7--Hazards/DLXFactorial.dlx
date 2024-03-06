@@ -6,57 +6,27 @@
 	ADDI R2, R0, 0
 	ADDI R3, R0, 0
 	LW R10, n(R0)
-	NOOP
-	NOOP
-	NOOP
 
 top
 	SLEI R11, R10, 1
-	NOOP
-	NOOP
-	NOOP
 	BNEZ R11, exit
-	NOOP
-	NOOP
 	ADDI R3, R1, 0
 	SUBI R2, R10, 1
 	JAL mult
-	NOOP
-	NOOP
-	NOOP
 	SUBI R10, R10, 1
 	J top
-	NOOP
-	NOOP
-	NOOP
 
 ;Function call to multiply registers
 mult
 	SLEI R11, R2, 1
-	NOOP
-	NOOP
-	NOOP
 	BNEZ R11, end
-	NOOP
-	NOOP
-	NOOP
 	ADD R1, R1, R3
 	SUBI R2, R2, 1
 	J mult
-	NOOP
-	NOOP
-	NOOP
 end 
 	JR R31
-	NOOP
-	NOOP
-	NOOP
 
 exit
 	SW f(R0), R1
 done
-	NOOP
 	J done
-	NOOP
-	NOOP
-	NOOP

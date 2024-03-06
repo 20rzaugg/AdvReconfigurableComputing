@@ -11,6 +11,7 @@ entity dlx_fetch is
         rst_l : in std_logic;
         addr_selector : in std_logic;
         branch_addr : in std_logic_vector(ADDR_WIDTH-1 downto 0);
+        bubble : in std_logic;
         decode_pc : out std_logic_vector(ADDR_WIDTH-1 downto 0);
         instr : out std_logic_vector(INSTR_WIDTH-1 downto 0)
     );
@@ -48,21 +49,23 @@ architecture hierarchial of dlx_fetch is
     end component mux2_1;
 
     signal mux_in : unsigned(ADDR_WIDTH-1 downto 0);
-    signal pc : std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
+    signal fetch_pc : std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
+    signal next_pc : std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
 
 begin
 
+    decode_pc <= fetch_pc;
 
     instr_mem_inst : instruction_mem
         port map (
-            address => pc,
+            address => fetch_pc,
             clock => clk,
             q => instr
         );
     
     addr_adder_inst : addr_adder
         port map (
-            addr => unsigned(pc),
+            addr => unsigned(fetch_pc),
             offset => "0000000001",
             result => mux_in
         );
@@ -75,14 +78,18 @@ begin
             sel => addr_selector,
             in0 => std_logic_vector(mux_in),
             in1 => branch_addr,
-            out0 => pc
+            out0 => next_pc
         );
     
     process (clk, rst_l) begin
         if rst_l = '0' then
-            pc <= (others => '0');
+            fetch_pc <= (others => '0');
         elsif rising_edge(clk) then
-            decode_pc <= pc;
+            if bubble = '0' then
+                fetch_pc <= next_pc;
+            else
+                fetch_pc <= fetch_pc;
+            end if;
         end if;
     end process;
 end architecture hierarchial;

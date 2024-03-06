@@ -11,7 +11,7 @@ entity mux2_1 is
         sel : in std_logic;
         in0  : in std_logic_vector(MUX_WIDTH-1 downto 0);
         in1  : in std_logic_vector(MUX_WIDTH-1 downto 0);
-        out0 : out std_logic_vector(MUX_WIDTH-1 downto 0)
+        out0 : out std_logic_vector(MUX_WIDTH-1 downto 0) := (others => '0')
     );
 end mux2_1;
 

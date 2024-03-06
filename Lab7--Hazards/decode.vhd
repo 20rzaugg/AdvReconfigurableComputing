@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.numeric_std.all;
 library work;
 use work.dlxlib.all;
 
@@ -12,12 +13,13 @@ entity dlx_decode is
         writeback_data : in STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
         writeback_reg : in STD_LOGIC_VECTOR (4 downto 0);
         writeback_en : in STD_LOGIC;
+        branch_taken : in STD_LOGIC;
         rs1_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
         rs2_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
         immediate : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
-        execute_instr : inout STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
+        execute_instr : inout STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0) := (others => '0');
         memory_instr : in STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
-        execute_pc : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
+        execute_pc : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0) := (others => '0');
         bubble : inout STD_LOGIC := '0';
         top_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
         bottom_data_hazard : out STD_LOGIC_VECTOR (1 downto 0)
@@ -30,6 +32,7 @@ architecture hierarchial of dlx_decode is
     signal rs1 : STD_LOGIC_VECTOR (4 downto 0);
     signal rs2 : STD_LOGIC_VECTOR (4 downto 0);
     signal imm16 : STD_LOGIC_VECTOR (15 downto 0);
+    signal pipeline_flush : std_logic := '0';
 
     component register_mem
         port (
@@ -53,6 +56,8 @@ architecture hierarchial of dlx_decode is
     end component;
 
     signal next_immediate : STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
+    signal next_top_data_hazard : STD_LOGIC_VECTOR (1 downto 0);
+    signal next_bottom_data_hazard : STD_LOGIC_VECTOR (1 downto 0);
 
 begin
 
@@ -91,46 +96,53 @@ begin
 
     process(clk, rst_l) begin
         if rising_edge(clk) then
-            if bubble = '0' then
-                execute_instr <= decode_instr;
-                execute_pc <= decode_pc;
-                immediate <= next_immediate;
-            else then
+            top_data_hazard <= next_top_data_hazard;
+            bottom_data_hazard <= next_bottom_data_hazard;
+            if branch_taken = '1' then
                 execute_instr <= (others => '0');
                 execute_pc <= (others => '0');
                 immediate <= (others => '0');
+                pipeline_flush <= '1';
+            elsif bubble = '0' and pipeline_flush = '0' then
+                execute_instr <= decode_instr;
+                execute_pc <= decode_pc;
+                immediate <= next_immediate;
+                pipeline_flush <= '0';
+            else
+                execute_instr <= (others => '0');
+                execute_pc <= (others => '0');
+                immediate <= (others => '0');
+                pipeline_flush <= '0';
             end if;
         end if;
     end process;
 
-    -- add output data hazard detection
-
     process(decode_instr, execute_instr, memory_instr, rs1, rs2) begin
-        bubble <= '0'
+        bubble <= '0';
         -- check for data hazards in src1
         if rs1 = execute_instr(25 downto 21) and execute_instr(31 downto 26) = LW then
             bubble <= '1';
-        elsif rs1 = execute_instr(25 downto 21) and has_writeback(execute_instr(31 downto 26) = '1') then
-            top_data_hazard <= RBW_EXMEM;
+        elsif rs1 = execute_instr(25 downto 21) and has_writeback(execute_instr(31 downto 26)) = '1' then
+            next_top_data_hazard <= RBW_EXMEM;
         elsif rs1 = memory_instr(25 downto 21) and memory_instr(31 downto 26) = LW then
-            top_data_hazard <= RBW_MEMWB_MEM;
-        elsif rs1 = memory_instr(25 downto 21) and has_writeback(memory_instr(31 downto 26) = '1') then
-            top_data_hazard <= RBW_MEMWB_ALU;
-        else then
-            top_data_hazard <= NO_HAZARD;
+            next_top_data_hazard <= RBW_MEMWB_MEM;
+        elsif rs1 = memory_instr(25 downto 21) and has_writeback(memory_instr(31 downto 26)) = '1' then
+            next_top_data_hazard <= RBW_MEMWB_ALU;
+        else
+            next_top_data_hazard <= NO_HAZARD;
         end if;
 
         -- check for data hazards in src2
         if rs2 = execute_instr(25 downto 21) and execute_instr(31 downto 26) = LW and is_immediate(opcode) = '0' then
             bubble <= '1';
-        elsif rs2 = execute_instr(25 downto 21) and has_writeback(execute_instr(31 downto 26) = '1') and is_immediate(opcode) = '0' then
-            bottom_data_hazard <= RBW_EXMEM;
+        elsif rs2 = execute_instr(25 downto 21) and has_writeback(execute_instr(31 downto 26)) = '1' and is_immediate(opcode) = '0' then
+            next_bottom_data_hazard <= RBW_EXMEM;
         elsif rs2 = memory_instr(25 downto 21) and memory_instr(31 downto 26) = LW and is_immediate(opcode) = '0' then
-            bottom_data_hazard <= RBW_MEMWB_MEM;
-        elsif rs2 = memory_instr(25 downto 21) and has_writeback(memory_instr(31 downto 26) = '1') and is_immediate(opcode) = '0' then
-            bottom_data_hazard <= RBW_MEMWB_ALU;
-        else then
-            bottom_data_hazard <= NO_HAZARD;
+            next_bottom_data_hazard <= RBW_MEMWB_MEM;
+        elsif rs2 = memory_instr(25 downto 21) and has_writeback(memory_instr(31 downto 26)) = '1' and is_immediate(opcode) = '0' then
+            next_bottom_data_hazard <= RBW_MEMWB_ALU;
+        else
+            next_bottom_data_hazard <= NO_HAZARD;
         end if;  
     end process;
 
