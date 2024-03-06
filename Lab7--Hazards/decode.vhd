@@ -33,6 +33,9 @@ architecture hierarchial of dlx_decode is
     signal rs2 : STD_LOGIC_VECTOR (4 downto 0);
     signal imm16 : STD_LOGIC_VECTOR (15 downto 0);
     signal pipeline_flush : std_logic := '0';
+    signal instr_queue : STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
+
+    signal after_bubble : std_logic := '0';
 
     component register_mem
         port (
@@ -61,16 +64,25 @@ architecture hierarchial of dlx_decode is
 
 begin
 
-    opcode <= decode_instr(31 downto 26);
-    rs1 <= decode_instr(20 downto 16);
-    imm16 <= decode_instr(15 downto 0);
-
-
-    process(opcode) begin
-        if opcode = SW then
-            rs2 <= decode_instr(25 downto 21);
+    process(opcode, instr_queue, decode_instr, after_bubble) begin
+        if after_bubble = '1' then
+            opcode <= instr_queue(31 downto 26);
+            rs1 <= instr_queue(20 downto 16);
+            imm16 <= instr_queue(15 downto 0);
+            if opcode = SW then
+                rs2 <= instr_queue(25 downto 21);
+            else
+                rs2 <= instr_queue(15 downto 11);
+            end if;
         else
-            rs2 <= decode_instr(15 downto 11);
+            opcode <= decode_instr(31 downto 26);
+            rs1 <= decode_instr(20 downto 16);
+            imm16 <= decode_instr(15 downto 0);
+            if opcode = SW then
+                rs2 <= decode_instr(25 downto 21);
+            else
+                rs2 <= decode_instr(15 downto 11);
+            end if;
         end if;
     end process;
 
@@ -98,21 +110,38 @@ begin
         if rising_edge(clk) then
             top_data_hazard <= next_top_data_hazard;
             bottom_data_hazard <= next_bottom_data_hazard;
-            if branch_taken = '1' then
-                execute_instr <= (others => '0');
-                execute_pc <= (others => '0');
-                immediate <= (others => '0');
-                pipeline_flush <= '1';
-            elsif bubble = '0' and pipeline_flush = '0' then
+            if after_bubble = '1' or pipeline_flush = '1' or bubble = '1' or branch_taken = '1' then
+                if after_bubble = '1' then
+                    instr_queue <= (others => '0');
+                    execute_instr <= instr_queue;
+                    execute_pc <= decode_pc;
+                    immediate <= next_immediate;
+                    after_bubble <= '0';
+                else
+                    execute_instr <= (others => '0');
+                    execute_pc <= (others => '0');
+                    immediate <= (others => '0');
+                end if;
+
+                if pipeline_flush = '1' then
+                    pipeline_flush <= '0';
+                end if;
+
+                if branch_taken = '1' then
+                    pipeline_flush <= '1';
+                end if;
+
+                if bubble = '1' then
+                    after_bubble <= '1';
+                    instr_queue <= decode_instr;
+                end if;
+            else
                 execute_instr <= decode_instr;
                 execute_pc <= decode_pc;
                 immediate <= next_immediate;
+                instr_queue <= (others => '0');
                 pipeline_flush <= '0';
-            else
-                execute_instr <= (others => '0');
-                execute_pc <= (others => '0');
-                immediate <= (others => '0');
-                pipeline_flush <= '0';
+                after_bubble <= '0';
             end if;
         end if;
     end process;

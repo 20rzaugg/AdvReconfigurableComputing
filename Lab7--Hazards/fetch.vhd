@@ -32,7 +32,8 @@ architecture hierarchial of dlx_fetch is
         port (
             addr : in unsigned(ADDR_WIDTH-1 downto 0);
             offset : in unsigned(ADDR_WIDTH-1 downto 0);
-            result : out unsigned(ADDR_WIDTH-1 downto 0)
+            result : inout unsigned(ADDR_WIDTH-1 downto 0);
+            bubble : in std_logic
         );
     end component addr_adder;
     
@@ -51,10 +52,9 @@ architecture hierarchial of dlx_fetch is
     signal mux_in : unsigned(ADDR_WIDTH-1 downto 0);
     signal fetch_pc : std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
     signal next_pc : std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
+    --signal mem_instr : std_logic_vector(INSTR_WIDTH-1 downto 0);
 
 begin
-
-    decode_pc <= fetch_pc;
 
     instr_mem_inst : instruction_mem
         port map (
@@ -67,7 +67,8 @@ begin
         port map (
             addr => unsigned(fetch_pc),
             offset => "0000000001",
-            result => mux_in
+            result => mux_in,
+            bubble => bubble
         );
 
     mux_inst : mux2_1
@@ -87,8 +88,10 @@ begin
         elsif rising_edge(clk) then
             if bubble = '0' then
                 fetch_pc <= next_pc;
+                decode_pc <= next_pc;
             else
                 fetch_pc <= fetch_pc;
+                decode_pc <= fetch_pc;
             end if;
         end if;
     end process;

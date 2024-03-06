@@ -148,11 +148,11 @@ begin
     process (clk, rst_l) is
     begin
         if (rst_l = '0') then
-            branch_taken <= '0';
+            --branch_taken <= '0';
             memory_instr <= (others => '0');
         elsif (rising_edge(clk)) then
-            branch_target <= next_branch_target;
-            branch_taken <= next_branch_taken;
+            --branch_target <= next_branch_target;
+            --branch_taken <= next_branch_taken;
             memory_instr <= execute_instr;
             reg2_out <= reg_in2;            
         end if;
@@ -161,16 +161,16 @@ begin
     process (opcode, reg_in1) is
     begin
         if (opcode = BEQZ and reg1_ff = x"00000000") or (opcode = BNEZ and reg1_ff /= x"00000000") or opcode = J or opcode = JR or opcode = JAL or opcode = JALR then
-            next_branch_taken <= '1';
+            branch_taken <= '1';
         else
-            next_branch_taken <= '0';
+            branch_taken <= '0';
         end if;
         if opcode = BEQZ or opcode = BNEZ or opcode = J or opcode = JAL then
-            next_branch_target <= immediate_in(ADDR_WIDTH-1 downto 0);
+            branch_target <= immediate_in(ADDR_WIDTH-1 downto 0);
         elsif opcode = JR or opcode = JALR then
-            next_branch_target <= reg1_ff(ADDR_WIDTH-1 downto 0);
+            branch_target <= reg1_ff(ADDR_WIDTH-1 downto 0);
         else
-            next_branch_target <= (others => '0');
+            branch_target <= (others => '0');
         end if;
     end process;
 

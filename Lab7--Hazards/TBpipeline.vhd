@@ -42,7 +42,7 @@ begin
     end process;
 
     process (index) begin
-        if index > 100 then
+        if index > 150 then
             report "Simulation finished" severity failure;
         else
             next_index <= index + 1;
