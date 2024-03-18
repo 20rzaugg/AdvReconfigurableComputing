@@ -1,12 +1,16 @@
 .data
 	n 1 6
 	f 1 0
+.const
+	s1 38 "Welcome to the DLX factorial program!\n"
+	s2 4 "! = "
 .text
 	LW R1, n(R0)
 	ADDI R2, R0, 0
 	ADDI R3, R0, 0
+	ADDI R5, R0, 0
 	LW R10, n(R0)
-
+	JAL prints1
 top
 	SLEI R11, R10, 1
 	BNEZ R11, exit
@@ -15,6 +19,24 @@ top
 	JAL mult
 	SUBI R10, R10, 1
 	J top
+
+prints1
+	LW R4, s1(R5)
+	BEQZ R4 doneprintings1
+	PCH R4
+	ADDI R5, R5, 1
+	J prints1
+doneprintings1
+	JR R31
+
+prints2
+	LW R4, s2(R5)
+	BEQZ R4 doneprintings2
+	PCH R4
+	ADDI R5, R5, 1
+	J prints2
+doneprintings2
+	JR R31
 
 ;Function call to multiply registers
 mult
@@ -28,5 +50,10 @@ end
 
 exit
 	SW f(R0), R1
+	LW R2, n(R0)
+	PD R2
+	ADDI R5, R0, 0
+	JAL prints2
+	PD R1
 done
 	J done
