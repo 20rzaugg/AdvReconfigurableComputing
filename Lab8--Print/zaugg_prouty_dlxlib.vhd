@@ -56,6 +56,9 @@ package dlxlib is
     constant JR : std_logic_vector(5 downto 0) := "101110";
     constant JAL : std_logic_vector(5 downto 0) := "101111";
     constant JALR : std_logic_vector(5 downto 0) := "110000";
+    constant PCH : std_logic_vector(5 downto 0) := "110001";
+    constant PD : std_logic_vector(5 downto 0) := "110010";
+    constant PDU : std_logic_vector(5 downto 0) := "110011";
 
     constant NO_HAZARD : std_logic_vector(1 downto 0) := "00";
     constant RBW_EXMEM : std_logic_vector(1 downto 0) := "01";
