@@ -19,8 +19,8 @@ architecture behavioral of printer is
 
     component pll1 is
         port (
-            areset : in std_logic := '0';
-            inclk0 : in std_logic := '0'; -- 50.0 MHz
+            areset : in std_logic;
+            inclk0 : in std_logic; -- 50.0 MHz
             c0 : out std_logic -- 19.2 kHz
         );
     end component;

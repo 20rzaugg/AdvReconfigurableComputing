@@ -43,8 +43,8 @@ USE altera_mf.all;
 ENTITY pll1 IS
 	PORT
 	(
-		areset		: IN STD_LOGIC  := '0';
-		inclk0		: IN STD_LOGIC  := '0';
+		areset		: IN STD_LOGIC;
+		inclk0		: IN STD_LOGIC;
 		c0		: OUT STD_LOGIC 
 	);
 END pll1;
