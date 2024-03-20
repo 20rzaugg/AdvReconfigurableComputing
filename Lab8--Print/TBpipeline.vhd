@@ -12,7 +12,7 @@ architecture testbench of TBexecute is
         port (
             clk : in std_logic;
             rst_l : in std_logic;
-            tx : out std_logic;
+            tx : out std_logic
         );
     end component;
 
