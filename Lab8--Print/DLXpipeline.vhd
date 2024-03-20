@@ -7,6 +7,7 @@ entity DLXpipeline is
     port (
         clk : in std_logic;
         rst_l : in std_logic
+        tx : out std_logic;
     );
 end DLXpipeline;
 
