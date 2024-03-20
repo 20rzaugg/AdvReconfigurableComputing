@@ -120,9 +120,11 @@ package body dlxlib is
         -- Perform arithmetic right shift
         if shift_amt > 0 then
             temp := input_data;
-            for i in 0 to shift_amt-1 loop
-                k := temp(temp'high); -- Preserve sign bit
-                temp := temp(0) & temp(temp'high downto 1);
+            for i in 0 to DATA_WIDTH-1 loop
+					if i <= shift_amt-1 then
+						k := temp(temp'high); -- Preserve sign bit
+						temp := temp(0) & temp(temp'high downto 1);
+					end if;
             end loop;
             return temp;
         else

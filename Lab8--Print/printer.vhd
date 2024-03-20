@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 library work;
 use work.dlxlib.all;
 
@@ -92,7 +91,8 @@ architecture behavioral of printer is
             tx : out std_logic;
             read_from_buffer : out std_logic
         );
-
+	 end component;
+	 
     signal instr_read : std_logic := '0';
     signal instr_write : std_logic := '0';
     signal instr_queue_empty : std_logic;
@@ -202,7 +202,7 @@ begin
         end if;
     end process;
 
-    process() is begin
+    process(state, instr_queue_out, instr_queue_empty, digit_empty, digit_top, signed_quotient, unsigned_quotient, signed_remainder, unsigned_remainder) is begin
         case state is
             when IDLE =>
                 write_char <= '0';
@@ -217,7 +217,7 @@ begin
                 end if;
             when READQ =>
                 digit_pop <= '0';
-                fifo_char <= others => '0';
+                fifo_char <= (others => '0');
                 write_char <= '0';
                 instr_read <= '0';
                 if instr_queue_out(37 downto 32) = PCH then
@@ -248,16 +248,16 @@ begin
                 instr_read <= '0';
                 digit_push <= '1';
                 if instr_queue_out(37 downto 32) = PD then
-                    digit_in <= std_logic_vector(unsigned("0000"&signed_remainder) + 48);
-                    if signed_quotient = (others => '0') then
+                    digit_in <= std_logic_vector(unsigned("0000" & signed_remainder) + 48);
+                    if signed_quotient = x"00000000" then
                         next_state <= NEGATIVE;
                     else
                         next_state <= DIVIDEx;
                         numerator <= signed_quotient;
                     end if;
                 elsif instr_queue_out(37 downto 32) = PDU then
-                    digit_in <= std_logic_vector(unsigned("0000"&unsigned_remainder) + 48);
-                    if unsigned_quotient = (others => '0') then
+                    digit_in <= std_logic_vector(unsigned("0000" & unsigned_remainder) + 48);
+                    if unsigned_quotient = x"00000000" then
                         next_state <= UNSTACK;
                     else
                         next_state <= DIVIDEx;
@@ -269,12 +269,13 @@ begin
             when NEGATIVE =>
                 digit_pop <= '0';
                 next_state <= UNSTACK;
-                if instr_queue_out(37 downto 32) = PD and instr_queue(31) = '1' then
-                    digit_in <= "00101101" -- '-'?
+                if instr_queue_out(37 downto 32) = PD and instr_queue_out(31) = '1' then
+                    digit_in <= "00101101"; -- '-'?
                     digit_push <= '1';
                 else
                     digit_in <= (others => '0');
                     digit_push <= '0';
+					 end if;
             when UNSTACK =>
                 if digit_empty = '0' then
                     next_state <= UNSTACK;
@@ -288,6 +289,7 @@ begin
             when others =>
                 next_state <= IDLE;
         end case;
+	 end process;
 
     instr_write <= '1' when instr_in(31 downto 26) = PCH or instr_in(31 downto 26) = PD or instr_in(31 downto 26) = PDU else '0';
 
