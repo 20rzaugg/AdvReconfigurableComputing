@@ -123,11 +123,19 @@ architecture behavioral of printer is
     signal unsigned_quotient : std_logic_vector(31 downto 0);
     signal unsigned_remainder : std_logic_vector(3 downto 0); 
 
+    signal n_rst_l : std_logic;
+    signal n_uart_queue_empty : std_logic;
+    signal queue_data_in : std_logic_vector(37 downto 0);
+
 begin
+
+    n_rst_l <= not rst_l;
+    n_uart_queue_empty <= not uart_queue_empty;
+    queue_data_in <= instr_in(31 downto 26) & data_in(31 downto 0)
 
     pll_inst : pll1
         port map (
-            areset => not rst_l,
+            areset => n_rst_l,
             inclk0 => clk,
             c0 => uart_tx_clk
         );
@@ -135,9 +143,9 @@ begin
     print_instr_queue_inst : print_instr_queue
         port map (
             clock => clk,
-            data => instr_in(31 downto 26) & data_in(31 downto 0),
+            data => queue_data_in,
             rdreq => instr_read,
-            sclr => not rst_l, -- check if correct
+            sclr => n_rst_l, -- check if correct
             wrreq => instr_write,
             empty => instr_queue_empty,
             full => instr_queue_full,
@@ -189,7 +197,7 @@ begin
             clk => uart_tx_clk,
             rst_l => rst_l,
             tx_data => uart_char,
-            tx_write => not uart_queue_empty,
+            tx_write => n_uart_queue_empty,
             tx => tx,
             read_from_buffer => uart_tx_buffer_read
         );
