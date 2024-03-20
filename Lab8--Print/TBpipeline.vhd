@@ -31,7 +31,7 @@ begin
 
     process
     begin
-        wait for 5 ns;
+        wait for 10 ns;
         clk <= not clk;
     end process;
 
