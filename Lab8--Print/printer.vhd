@@ -131,7 +131,7 @@ begin
 
     n_rst_l <= not rst_l;
     n_uart_queue_empty <= not uart_queue_empty;
-    queue_data_in <= instr_in(31 downto 26) & data_in(31 downto 0)
+    queue_data_in <= instr_in(31 downto 26) & data_in(31 downto 0);
 
     pll_inst : pll1
         port map (
