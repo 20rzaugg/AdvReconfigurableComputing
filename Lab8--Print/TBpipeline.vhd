@@ -12,7 +12,7 @@ architecture testbench of TBexecute is
         port (
             clk : in std_logic;
             rst_l : in std_logic;
-            tx : out std_logic;
+            tx : out std_logic
         );
     end component;
 
@@ -31,7 +31,7 @@ begin
 
     process
     begin
-        wait for 5 ns;
+        wait for 10 ns;
         clk <= not clk;
     end process;
 
