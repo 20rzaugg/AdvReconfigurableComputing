@@ -22,7 +22,8 @@ entity dlx_decode is
         execute_pc : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0) := (others => '0');
         bubble : inout STD_LOGIC := '0';
         top_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
-        bottom_data_hazard : out STD_LOGIC_VECTOR (1 downto 0)
+        bottom_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
+        print_queue_full : in STD_LOGIC
     );
 end dlx_decode;
 

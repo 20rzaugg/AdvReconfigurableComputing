@@ -43,7 +43,8 @@ architecture behavioral of DLXpipeline is
             execute_pc : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
             bubble : inout STD_LOGIC := '0';
             top_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
-            bottom_data_hazard : out STD_LOGIC_VECTOR (1 downto 0)
+            bottom_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
+            print_queue_full : in std_logic
         );
     end component;
 
@@ -92,7 +93,17 @@ architecture behavioral of DLXpipeline is
         );
     end component;
 
-    
+    component printer is
+        port ( 
+            clk : in  std_logic;
+            rst_l : in  std_logic;
+            instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
+            data_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
+            instr_queue_full : out std_logic;
+            tx : out std_logic
+        );
+    end component;
+
     signal decode_pc : std_logic_vector(ADDR_WIDTH-1 downto 0); -- fetch to decode
     signal decode_instr : std_logic_vector(INSTR_WIDTH-1 downto 0); -- fetch to decode
 
@@ -126,6 +137,8 @@ architecture behavioral of DLXpipeline is
     signal top_data_hazard : std_logic_vector(1 downto 0);
     signal bottom_data_hazard : std_logic_vector(1 downto 0);
 
+    signal instr_queue_full : std_logic;
+
 begin
 
     fetch : dlx_fetch
@@ -157,7 +170,8 @@ begin
             execute_pc => execute_pc, --to execute
             bubble => bubble, --to fetch
             top_data_hazard => top_data_hazard,
-            bottom_data_hazard => bottom_data_hazard
+            bottom_data_hazard => bottom_data_hazard,
+            print_queue_full => instr_queue_full
         );
 
     execute : dlx_execute
@@ -200,6 +214,16 @@ begin
             writeback_data_out => writeback_data, --to decode
             writeback_address_out => writeback_address, --to decode
             writeback_enable_out => writeback_en --to decode
+        );
+
+    printer1 : printer
+        port map (
+            clk => clk, --from system
+            rst_l => rst_l, --from system
+            instr_in => execute_instr, --from decode
+            data_in => rs1_data, --from decode
+            instr_queue_full => instr_queue_full, --to decode
+            tx => tx --to system
         );
 
 end behavioral;
