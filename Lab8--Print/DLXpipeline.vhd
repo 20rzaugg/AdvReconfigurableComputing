@@ -65,7 +65,8 @@ architecture behavioral of DLXpipeline is
             top_data_hazard : in STD_LOGIC_VECTOR (1 downto 0);
             bottom_data_hazard : in STD_LOGIC_VECTOR (1 downto 0);
             fast_track_mw_alu : in std_logic_vector(DATA_WIDTH-1 downto 0);
-            fast_track_mw_mem : in std_logic_vector(DATA_WIDTH-1 downto 0)
+            fast_track_mw_mem : in std_logic_vector(DATA_WIDTH-1 downto 0);
+            alu_in1 : inout std_logic_vector(DATA_WIDTH-1 downto 0)
         );
     end component;
 
@@ -139,6 +140,8 @@ architecture behavioral of DLXpipeline is
 
     signal instr_queue_full : std_logic;
 
+    signal ff_alu_in1 : std_logic_vector(DATA_WIDTH-1 downto 0);
+
 begin
 
     fetch : dlx_fetch
@@ -191,7 +194,8 @@ begin
             top_data_hazard => top_data_hazard,
             bottom_data_hazard => bottom_data_hazard,
             fast_track_mw_alu => memory_alu_result_out,
-            fast_track_mw_mem => data_mem_out
+            fast_track_mw_mem => data_mem_out,
+            alu_in1 => ff_alu_in1
         );
 
     memory : dlx_memory
@@ -221,7 +225,7 @@ begin
             clk => clk, --from system
             rst_l => rst_l, --from system
             instr_in => execute_instr, --from decode
-            data_in => rs1_data, --from decode
+            data_in => ff_alu_in1, --from decode
             instr_queue_full => instr_queue_full, --to decode
             tx => tx --to system
         );

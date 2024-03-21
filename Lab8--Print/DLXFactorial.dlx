@@ -1,11 +1,12 @@
 .data
-	n 1 6
+	n 1 8
 	f 1 0
 .const
-	s1 38 "Welcome to the DLX factorial program!\n"
+	s1 41 "\n\rWelcome to the DLX factorial program!\n\r"
 	s2 4 "! = "
 .text
 	LW R1, n(R0)
+	LW R6, n(R0)
 	ADDI R2, R0, 0
 	ADDI R3, R0, 0
 	ADDI R5, R0, 0
@@ -50,8 +51,7 @@ end
 
 exit
 	SW f(R0), R1
-	LW R2, n(R0)
-	PD R2
+	PD R6
 	ADDI R5, R0, 0
 	JAL prints2
 	PD R1

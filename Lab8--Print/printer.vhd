@@ -118,6 +118,7 @@ architecture behavioral of printer is
     signal uart_char : std_logic_vector(7 downto 0);
     
     signal numerator : std_logic_vector(31 downto 0);
+    signal next_numerator : std_logic_vector(31 downto 0);
     signal signed_quotient : std_logic_vector(31 downto 0);
     signal signed_remainder : std_logic_vector(3 downto 0);
     signal unsigned_quotient : std_logic_vector(31 downto 0);
@@ -207,15 +208,19 @@ begin
             state <= IDLE;
         elsif rising_edge(clk) then
             state <= next_state;
+            numerator <= next_numerator;
         end if;
     end process;
 
-    process(state, instr_queue_out, instr_queue_empty, digit_empty, digit_top, signed_quotient, unsigned_quotient, signed_remainder, unsigned_remainder) is begin
+    process(state, instr_queue_out, instr_queue_empty, digit_empty, digit_top, signed_quotient, unsigned_quotient, signed_remainder, unsigned_remainder, numerator) is begin
+        next_numerator <= numerator;
+        write_char <= '0';
+        digit_pop <= '0';
+        digit_push <= '0';
+        instr_read <= '0';
+        fifo_char <= (others => '0');
         case state is
             when IDLE =>
-                write_char <= '0';
-                digit_pop <= '0';
-                fifo_char <= (others => '0');
                 if instr_queue_empty = '0' then
                     next_state <= READQ;
                     instr_read <= '1';
@@ -224,15 +229,11 @@ begin
                     instr_read <= '0';
                 end if;
             when READQ =>
-                digit_pop <= '0';
-                fifo_char <= (others => '0');
-                write_char <= '0';
-                instr_read <= '0';
                 if instr_queue_out(37 downto 32) = PCH then
                     next_state <= PCHAR;
                 elsif instr_queue_out(37 downto 32) = PD or instr_queue_out(37 downto 32) = PDU then
                     next_state <= DIVIDEx;
-                    numerator <= instr_queue_out(31 downto 0);
+                    next_numerator <= instr_queue_out(31 downto 0);
                 else
                     next_state <= IDLE;
                 end if;
@@ -261,7 +262,7 @@ begin
                         next_state <= NEGATIVE;
                     else
                         next_state <= DIVIDEx;
-                        numerator <= signed_quotient;
+                        next_numerator <= signed_quotient;
                     end if;
                 elsif instr_queue_out(37 downto 32) = PDU then
                     digit_in <= std_logic_vector(unsigned("0000" & unsigned_remainder) + 48);
@@ -269,7 +270,7 @@ begin
                         next_state <= UNSTACK;
                     else
                         next_state <= DIVIDEx;
-                        numerator <= unsigned_quotient;
+                        next_numerator <= unsigned_quotient;
                     end if;
                 else
                     next_state <= IDLE;

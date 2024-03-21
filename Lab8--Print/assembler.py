@@ -62,6 +62,7 @@ if __name__ == "__main__":
                         s = re.findall(r'".+"', line)[0][1:-1]
                         s = s.replace("\\n","\n")
                         s = s.replace("\\t","\t")
+                        s = s.replace("\\r","\r")
                         if len(s) != int(k[1]):
                             print("Error: String length does not match\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                             exit(1)
