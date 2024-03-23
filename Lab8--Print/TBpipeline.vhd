@@ -27,7 +27,6 @@ begin
             clk => clk,
             rst_l => rst_l
         );
-    rst_l <= '1';
 
     process
     begin
@@ -43,6 +42,11 @@ begin
     end process;
 
     process (index) begin
+        if index = 500 then
+            rst_l <= 0;
+        else
+            rst_l <= 1;
+        end if;
         if index > 1000 then
             report "Simulation finished" severity failure;
         else
