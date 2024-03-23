@@ -8,6 +8,7 @@ entity register_mem is
     port
     (
         clk : in std_logic;
+        rst_l : in std_logic;
         read_addr1 : in std_logic_vector(4 downto 0);
         read_addr2 : in std_logic_vector(4 downto 0);
         write_addr : in std_logic_vector(4 downto 0);
@@ -33,9 +34,11 @@ architecture rtl of register_mem is
 
 begin
 
-    process(clk)
+    process(clk, rst_l)
     begin
-        if(rising_edge(clk)) then
+        if(rst_l = '0') then
+            ram(0) <= (others => '0');
+        elsif(rising_edge(clk)) then
             ram(0) <= (others => '0');
             if(write_en = '1' and unsigned(write_addr) > 0) then
                 ram(to_integer(unsigned(write_addr))) <= write_data;
