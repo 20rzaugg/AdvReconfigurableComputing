@@ -45,14 +45,22 @@ begin
     
     process (clk, rst_l) begin
         if rst_l = '0' then
-            wren <= '0';
+            instr_out <= (others => '0');
+            alu_result_out <= (others => '0');
         elsif rising_edge(clk) then
+            alu_result_out <= alu_result_in;
+            instr_out <= instr_in;
+        end if;
+    end process;
+
+    process(instr_in, rst_l) begin
+        if rst_l = '0' then
+            wren <= '0';
+        else
             wren <= '0';
             if instr_in(31 downto 26) = SW then
                 wren <= '1';
             end if;
-            alu_result_out <= alu_result_in;
-            instr_out <= instr_in;
         end if;
     end process;
 
