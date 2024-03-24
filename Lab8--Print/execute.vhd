@@ -158,7 +158,7 @@ begin
         end if;
     end process;
 
-    process (opcode, reg1_ff, immediate_in) is
+    process (opcode, reg1_ff) is
     begin
         if opcode = BEQZ or opcode = BNEZ or opcode = J or opcode = JAL then
             branch_target <= immediate_in(ADDR_WIDTH-1 downto 0);

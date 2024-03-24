@@ -41,7 +41,6 @@ architecture hierarchial of dlx_decode is
     component register_mem
         port (
             clk : in std_logic;
-            rst_l : in std_logic;
             read_addr1 : in std_logic_vector(4 downto 0);
             read_addr2 : in std_logic_vector(4 downto 0);
             write_addr : in std_logic_vector(4 downto 0);
@@ -91,7 +90,6 @@ begin
     register_inst : register_mem
         port map (
             clk => clk,
-            rst_l => rst_l,
             read_addr1 => rs1,
             read_addr2 => rs2,
             write_addr => writeback_reg,
@@ -110,16 +108,7 @@ begin
 
 
     process(clk, rst_l) begin
-        if rst_l = '0' then
-            top_data_hazard <= (others => '0');
-            bottom_data_hazard <= (others => '0');
-            immediate <= (others => '0');
-            instr_queue <= (others => '0');
-            execute_instr <= (others => '0');
-            execute_pc <= (others => '0');
-            after_bubble <= '0';
-            pipeline_flush <= '0';
-        elsif rising_edge(clk) then
+        if rising_edge(clk) then
             top_data_hazard <= next_top_data_hazard;
             bottom_data_hazard <= next_bottom_data_hazard;
             if after_bubble = '1' or pipeline_flush = '1' or bubble = '1' or branch_taken = '1' then

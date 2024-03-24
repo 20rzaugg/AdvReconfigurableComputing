@@ -219,7 +219,6 @@ begin
         digit_push <= '0';
         instr_read <= '0';
         fifo_char <= (others => '0');
-        digit_in <= (others => '0');
         case state is
             when IDLE =>
                 if instr_queue_empty = '0' then
@@ -239,12 +238,23 @@ begin
                     next_state <= IDLE;
                 end if;
             when PCHAR =>
+                digit_pop <= '0';
                 next_state <= IDLE;
                 fifo_char <= instr_queue_out(7 downto 0);
                 write_char <= '1';
+                instr_read <= '0';
+                digit_push <= '0';
             when DIVIDEx =>
+                digit_pop <= '0';
+                fifo_char <= (others => '0');
+                write_char <= '0';
+                instr_read <= '0';
+                digit_push <= '0';
                 next_state <= STORE;
             when STORE =>
+                digit_pop <= '0';
+                write_char <= '0';
+                instr_read <= '0';
                 digit_push <= '1';
                 if instr_queue_out(37 downto 32) = PD then
                     digit_in <= std_logic_vector(unsigned("0000" & signed_remainder) + 48);
@@ -266,6 +276,7 @@ begin
                     next_state <= IDLE;
                 end if;
             when NEGATIVE =>
+                digit_pop <= '0';
                 next_state <= UNSTACK;
                 if instr_queue_out(37 downto 32) = PD and instr_queue_out(31) = '1' then
                     digit_in <= "00101101"; -- '-'?
