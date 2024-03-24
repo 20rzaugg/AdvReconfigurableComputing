@@ -37,6 +37,10 @@ begin
                 next_out1 <= std_logic_vector(unsigned(in1) + unsigned(in2));
             when LW =>
                 next_out1 <= std_logic_vector(unsigned(in1) + unsigned(in2));
+            when SWP =>
+                next_out1 <= std_logic_vector(unsigned(in1) + unsigned(in2));
+            when LWP =>
+                next_out1 <= std_logic_vector(unsigned(in1) + unsigned(in2));
             when ADDx =>
                 next_out1 <= std_logic_vector(signed(in1) + signed(in2));
             when ADDI =>

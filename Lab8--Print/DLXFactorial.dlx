@@ -1,17 +1,20 @@
 .data
-	n 1 8
+	n 1 0
 	f 1 0
 .const
-	s1 41 "\n\rWelcome to the DLX factorial program!\n\r"
-	s2 4 "! = "
+	s1 64 "\n\rWelcome to the DLX factorial program!\n\rPlease enter a number: "
+	s2 2 "\n\r"
+	s3 4 "! = "
+
 .text
-	LW R1, n(R0)
-	LW R6, n(R0)
+	ADDI R4, R0, %s1
+	JAL printstring
+	GDU R1
+	SW %n(R0), R1
 	ADDI R2, R0, 0
 	ADDI R3, R0, 0
-	ADDI R5, R0, 0
-	LW R10, n(R0)
-	JAL prints1
+	LW R10, %n(R0)
+	
 top
 	SLEI R11, R10, 1
 	BNEZ R11, exit
@@ -21,22 +24,16 @@ top
 	SUBI R10, R10, 1
 	J top
 
-prints1
-	LW R4, s1(R5)
-	BEQZ R4 doneprintings1
-	PCH R4
+;Function call to print string, input pointer R4
+printstring
+	ADDI R5, R0, 0
+psloop
+	LWP R6, R4(R5)
+	BEQZ R6 doneprintings1
+	PCH R6
 	ADDI R5, R5, 1
-	J prints1
+	J psloop
 doneprintings1
-	JR R31
-
-prints2
-	LW R4, s2(R5)
-	BEQZ R4 doneprintings2
-	PCH R4
-	ADDI R5, R5, 1
-	J prints2
-doneprintings2
 	JR R31
 
 ;Function call to multiply registers
@@ -50,10 +47,13 @@ end
 	JR R31
 
 exit
-	SW f(R0), R1
+	SW %f(R0), R1
+	ADDI R4, R0, %s2
+	JAL printstring
+	LW R6, %n(R0)
 	PD R6
-	ADDI R5, R0, 0
-	JAL prints2
+	ADDI R4, R0, %s3
+	JAL printstring
 	PD R1
 done
 	J done

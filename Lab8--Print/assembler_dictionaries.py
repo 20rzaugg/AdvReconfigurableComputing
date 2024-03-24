@@ -10,7 +10,7 @@ instruction_set = {
                  },
      "LW":    {
                      "opcode": "000001",
-                     "operands": [(dest_reg, 5),(imm, 16),(src_reg1, 5)]
+                     "operands": [(dest_reg, 5),(imm, 16),(src_reg1, 5)] # LW dest immediate_address(offset)
                  },
      "SW":    {
                      "opcode": "000010",
@@ -211,6 +211,22 @@ instruction_set = {
      "PDU":   {
                     "opcode": "110011",
                     "operands": [(src_reg1, 5),(unused, 21)]
+                 },
+     "GD":   {
+                    "opcode": "110100",
+                    "operands": [(dest_reg, 5),(unused, 21)]
+                 },
+     "GDU":   {
+                    "opcode": "110101",
+                    "operands": [(dest_reg, 5),(unused, 21)]
+                 },
+     "LWP":   {
+                    "opcode": "110110",
+                    "operands": [(dest_reg, 5),(src_reg2, 5),(src_reg1, 5)] # LWP r_dest r_base r_offset
+                 },
+     "SWP":   {
+                    "opcode": "110111",
+                    "operands": [(src_reg2, 5),(src_reg1, 5),(dest_reg, 5)] # SWP r_base r_offset r_src
                  }
 }
 

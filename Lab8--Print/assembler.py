@@ -105,7 +105,7 @@ BEGIN\n\n""")
                 line_number += 1
                 continue
             elif mode == TEXT:
-                k = re.findall(r"\w+", line)
+                k = re.findall(r"[%\w]+", line)
                 b = ""
                 if k:
                     K = k[0].upper()
@@ -136,8 +136,13 @@ BEGIN\n\n""")
                                     print("Error: Invalid register name\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                                     exit(1)
                             elif i[0] == imm:
+                                #handle variables
                                 if k[arg] in data_memory_table.keys():
                                     b = b[0:16] + format(data_memory_table[k[arg]][0], '016b')
+                                    arg += 1
+                                #handle pointers
+                                elif k[arg][0] == '%' and k[arg][1:] in data_memory_table.keys():
+                                    b = b[0:16] + format(data_memory_table[k[arg][1:]][0], '016b')
                                     arg += 1
                                 elif k[arg].upper() in instruction_memory_table.keys():
                                     b = b[0:16] + format(instruction_memory_table[k[arg].upper()], '016b')
