@@ -2,11 +2,12 @@
 	n 1 8
 	f 1 0
 .const
-	s1 41 "\n\rWelcome to the DLX factorial program!\n\r"
+	s1 41 "\n\rWelcome to the DLX factorial program!\n\r Enter a number: "
 	s2 4 "! = "
 .text
-	LW R1, n(R0)
-	LW R6, n(R0)
+	GDU R12
+	ADDI R1, R12, 0
+	ADDI R6, R12, 0
 	ADDI R2, R0, 0
 	ADDI R3, R0, 0
 	ADDI R5, R0, 0
