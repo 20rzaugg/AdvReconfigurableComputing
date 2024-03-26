@@ -23,7 +23,8 @@ entity dlx_decode is
         bubble : inout STD_LOGIC := '0';
         top_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
         bottom_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
-        print_queue_full : in STD_LOGIC
+        print_queue_full : in STD_LOGIC;
+        input_buffer_empty : in STD_LOGIC
     );
 end dlx_decode;
 
@@ -112,18 +113,6 @@ begin
             top_data_hazard <= next_top_data_hazard;
             bottom_data_hazard <= next_bottom_data_hazard;
             if after_bubble = '1' or pipeline_flush = '1' or bubble = '1' or branch_taken = '1' then
-                if after_bubble = '1' then
-                    instr_queue <= (others => '0');
-                    execute_instr <= instr_queue;
-                    execute_pc <= decode_pc;
-                    immediate <= next_immediate;
-                    after_bubble <= '0';
-                else
-                    execute_instr <= (others => '0');
-                    execute_pc <= (others => '0');
-                    immediate <= (others => '0');
-                end if;
-
                 if pipeline_flush = '1' then
                     pipeline_flush <= '0';
                 end if;
@@ -134,8 +123,22 @@ begin
 
                 if bubble = '1' then
                     after_bubble <= '1';
-                    instr_queue <= decode_instr;
-                end if;
+                    if instr_queue = x"00000000" then
+                        instr_queue <= decode_instr;
+                    else
+                        instr_queue <= instr_queue;
+                    end if;
+                elsif after_bubble = '1' then
+                    instr_queue <= (others => '0');
+                    execute_instr <= instr_queue;
+                    execute_pc <= decode_pc;
+                    immediate <= next_immediate;
+                    after_bubble <= '0';
+                else
+                    execute_instr <= (others => '0');
+                    execute_pc <= (others => '0');
+                    immediate <= (others => '0');
+                end if; 
             else
                 execute_instr <= decode_instr;
                 execute_pc <= decode_pc;
@@ -147,7 +150,7 @@ begin
         end if;
     end process;
 
-    process(decode_instr, execute_instr, memory_instr, rs1, rs2) begin
+    process(decode_instr, execute_instr, memory_instr, rs1, rs2, print_queue_full, input_buffer_empty, opcode) begin
         bubble <= '0';
         -- check for data hazards in src1
         if rs1 = execute_instr(25 downto 21) and execute_instr(31 downto 26) = LW then
@@ -173,7 +176,14 @@ begin
             next_bottom_data_hazard <= RBW_MEMWB_ALU;
         else
             next_bottom_data_hazard <= NO_HAZARD;
-        end if;  
+        end if;
+        
+        --if (print_queue_full = '1' and (opcode = PD or opcode = PDU or opcode = PCH)) or
+        --   (input_buffer_empty = '0' and (opcode = GD or opcode = GDU)) then
+        if (input_buffer_empty = '1' and (opcode = GD or opcode = GDU)) then
+            bubble <= '1'; 
+        end if;
+        
     end process;
 
 end hierarchial;

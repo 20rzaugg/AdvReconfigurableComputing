@@ -3,16 +3,17 @@ library work;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.dlxlib.all;
 
-entity TBexecute is
-end TBexecute;
+entity TBpipeline is
+end TBpipeline;
 
-architecture testbench of TBexecute is
+architecture testbench of TBpipeline is
     
     component DLXpipeline is
         port (
             clk : in std_logic;
             rst_l : in std_logic;
-            tx : out std_logic
+            tx : out std_logic;
+            rx : in std_logic
         );
     end component;
 
@@ -20,12 +21,16 @@ architecture testbench of TBexecute is
     signal rst_l : std_logic := '1';
     signal index : integer := 0;
     signal next_index : integer := 0;
+    signal tx : std_logic;
+    signal rx : std_logic;
 
 begin
     DUT : DLXpipeline
         port map (
             clk => clk,
-            rst_l => rst_l
+            rst_l => rst_l,
+            tx => tx,
+            rx => rx
         );
 
     process

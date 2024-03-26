@@ -59,6 +59,8 @@ package dlxlib is
     constant PCH : std_logic_vector(5 downto 0) := "110001";
     constant PD : std_logic_vector(5 downto 0) := "110010";
     constant PDU : std_logic_vector(5 downto 0) := "110011";
+    constant GD : std_logic_vector(5 downto 0) := "110100";
+    constant GDU : std_logic_vector(5 downto 0) := "110101";
 
     constant NO_HAZARD : std_logic_vector(1 downto 0) := "00";
     constant RBW_EXMEM : std_logic_vector(1 downto 0) := "01";
@@ -142,7 +144,7 @@ package body dlxlib is
            opcode = SGTI or opcode = SGTU or opcode = SGTUI or opcode = SLE or opcode = SLEI or
            opcode = SLEU or opcode = SLEUI or opcode = SGE or opcode = SGEI or opcode = SGEU or
            opcode = SGEUI or opcode = SEQ or opcode = SEQI or opcode = SNE or opcode = SNEI or
-           opcode = JAL or opcode = JALR or opcode = LW then
+           opcode = JAL or opcode = JALR or opcode = LW or opcode = GD or opcode = GDU then
             return '1';
         else
             return '0';

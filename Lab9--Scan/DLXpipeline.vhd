@@ -7,11 +7,21 @@ entity DLXpipeline is
     port (
         clk : in std_logic;
         rst_l : in std_logic;
-        tx : out std_logic
+        tx : out std_logic;
+        rx : in std_logic
     );
 end DLXpipeline;
 
 architecture behavioral of DLXpipeline is
+
+    component pll1 is
+        port (
+            areset : IN STD_LOGIC  := '0';
+		    inclk0 : IN STD_LOGIC  := '0';
+		    c0 : OUT STD_LOGIC; -- 0.0192 MHz
+		    c1 : OUT STD_LOGIC  -- 0.1536 MHz
+        );
+    end component;
 
     component dlx_fetch is
         port (
@@ -44,7 +54,8 @@ architecture behavioral of DLXpipeline is
             bubble : inout STD_LOGIC := '0';
             top_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
             bottom_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
-            print_queue_full : in std_logic
+            print_queue_full : in std_logic;
+            input_buffer_empty : in std_logic
         );
     end component;
 
@@ -90,18 +101,32 @@ architecture behavioral of DLXpipeline is
             alu_result_in : in std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
             writeback_data_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
             writeback_address_out : out std_logic_vector(4 downto 0);
-            writeback_enable_out : out std_logic
+            writeback_enable_out : out std_logic;
+            input_buffer_output : in std_logic_vector(DATA_WIDTH-1 downto 0)
         );
     end component;
 
     component printer is
         port ( 
             clk : in  std_logic;
+            tx_clk : in std_logic;
             rst_l : in  std_logic;
             instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
             data_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
             instr_queue_full : out std_logic;
             tx : out std_logic
+        );
+    end component;
+
+    component scanner is
+        port (
+            clk : in std_logic;
+            rx_clk : in std_logic;
+            rst_l : in std_logic;
+            rx : in std_logic;
+            instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
+            input_buffer_empty : inout std_logic;
+            data_out : out std_logic_vector(DATA_WIDTH-1 downto 0)
         );
     end component;
 
@@ -142,7 +167,24 @@ architecture behavioral of DLXpipeline is
 
     signal ff_alu_in1 : std_logic_vector(DATA_WIDTH-1 downto 0);
 
+    signal rx_clk : std_logic;
+    signal tx_clk : std_logic;
+    signal areset : std_logic;
+
+    signal input_buffer_empty : std_logic;
+    signal input_buffer_data : std_logic_vector(DATA_WIDTH-1 downto 0);
+
 begin
+
+    areset <= not rst_l;
+
+    pll1_inst : pll1
+        port map (
+            areset => areset,
+            inclk0 => clk,
+            c0 => tx_clk,
+            c1 => rx_clk
+        );
 
     fetch : dlx_fetch
         port map (
@@ -174,7 +216,8 @@ begin
             bubble => bubble, --to fetch
             top_data_hazard => top_data_hazard,
             bottom_data_hazard => bottom_data_hazard,
-            print_queue_full => instr_queue_full
+            print_queue_full => instr_queue_full,
+            input_buffer_empty => input_buffer_empty
         );
 
     execute : dlx_execute
@@ -217,17 +260,30 @@ begin
             alu_result_in => memory_alu_result_out, --from memory
             writeback_data_out => writeback_data, --to decode
             writeback_address_out => writeback_address, --to decode
-            writeback_enable_out => writeback_en --to decode
+            writeback_enable_out => writeback_en, --to decode
+            input_buffer_output => input_buffer_data
         );
 
     printer1 : printer
         port map (
             clk => clk, --from system
+            tx_clk => tx_clk,
             rst_l => rst_l, --from system
             instr_in => execute_instr, --from decode
             data_in => ff_alu_in1, --from decode
             instr_queue_full => instr_queue_full, --to decode
             tx => tx --to system
+        );
+
+    scanner1 : scanner
+        port map (
+            clk => clk, --from system
+            rx_clk => rx_clk,
+            rst_l => rst_l, --from system
+            rx => rx, --from system
+            instr_in => memory_instr, --from execute ***maybe change to memory_instr***
+            input_buffer_empty => input_buffer_empty, --to decode
+            data_out => input_buffer_data --to writeback
         );
 
 end behavioral;

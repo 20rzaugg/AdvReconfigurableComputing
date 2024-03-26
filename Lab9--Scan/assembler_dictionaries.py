@@ -211,6 +211,14 @@ instruction_set = {
      "PDU":   {
                     "opcode": "110011",
                     "operands": [(src_reg1, 5),(unused, 21)]
+                 },
+     "GD":    {
+                    "opcode": "110100",
+                    "operands": [(dest_reg, 5),(unused, 21)]
+                 },
+     "GDU":   {
+                    "opcode": "110101",
+                    "operands": [(dest_reg, 5),(unused, 21)]
                  }
 }
 

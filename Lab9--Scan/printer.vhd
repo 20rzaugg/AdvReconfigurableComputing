@@ -7,6 +7,7 @@ use work.dlxlib.all;
 entity printer is
     port ( 
         clk : in  std_logic;
+        tx_clk : in std_logic;
         rst_l : in  std_logic;
         instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
         data_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -16,14 +17,6 @@ entity printer is
 end printer;
 
 architecture behavioral of printer is
-
-    component pll1 is
-        port (
-            areset : in std_logic;
-            inclk0 : in std_logic; -- 50.0 MHz
-            c0 : out std_logic -- 19.2 kHz
-        );
-    end component;
 
     component print_instr_queue is
         port (
@@ -134,13 +127,6 @@ begin
     n_uart_queue_empty <= not uart_queue_empty;
     queue_data_in <= instr_in(31 downto 26) & data_in(31 downto 0);
 
-    pll_inst : pll1
-        port map (
-            areset => n_rst_l,
-            inclk0 => clk,
-            c0 => uart_tx_clk
-        );
-
     print_instr_queue_inst : print_instr_queue
         port map (
             clock => clk,
@@ -190,12 +176,12 @@ begin
             wrreq => write_char,
             q => uart_char,
             rdempty => uart_queue_empty,
-            wrfull => instr_queue_full
+            wrfull => open
         );
 
     UART_tx_inst : UART_tx
         port map (
-            clk => uart_tx_clk,
+            clk => tx_clk,
             rst_l => rst_l,
             tx_data => uart_char,
             tx_write => n_uart_queue_empty,
