@@ -47,11 +47,7 @@ begin
     end process;
 
     process (index) begin
-        if index = 700 or index = 701 or index = 702 then
-            rst_l <= '0';
-        else
-            rst_l <= '1';
-        end if;
+        rst_l <= '1';
         if index > 1400 then
             report "Simulation finished" severity failure;
         else
