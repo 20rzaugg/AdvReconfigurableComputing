@@ -112,7 +112,6 @@ set_global_assignment -name VHDL_FILE DLXpipeline.vhd
 set_global_assignment -name VHDL_FILE dlx_processor.vhd
 set_global_assignment -name VHDL_FILE digit_stack.vhd
 set_global_assignment -name VHDL_FILE decode.vhd
-set_global_assignment -name VHDL_FILE dcfifo1.vhd
 set_global_assignment -name QIP_FILE dcfifo1.qip
 set_global_assignment -name SOURCE_FILE dcfifo1.cmp
 set_global_assignment -name VHDL_FILE data_mem.vhd

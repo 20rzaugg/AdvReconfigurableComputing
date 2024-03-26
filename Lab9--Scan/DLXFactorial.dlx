@@ -1,5 +1,4 @@
 .data
-	n 1 8
 	f 1 0
 .const
 	s1 57 "\n\rWelcome to the DLX factorial program!\n\rEnter a number: "
@@ -7,12 +6,12 @@
 .text
 	ADDI R5, R0, 0
 	JAL prints1
-	ADDI R1, R12, 0
-	ADDI R6, R12, 0
 	ADDI R2, R0, 0
 	ADDI R3, R0, 0
 	GDU R12
-	LW R10, n(R0)
+	ADDI R1, R12, 0
+	ADDI R6, R12, 0
+	ADDI R10, R12, 0
 top
 	SLEI R11, R10, 1
 	BNEZ R11, exit

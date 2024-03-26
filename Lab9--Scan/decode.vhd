@@ -109,10 +109,22 @@ begin
 
 
     process(clk, rst_l) begin
-        if rising_edge(clk) then
+        if rst_l = '0' then
+            top_data_hazard <= (others => '0');
+            bottom_data_hazard <= (others => '0');
+            execute_instr <= (others => '0');
+            execute_pc <= (others => '0');
+            immediate <= (others => '0');
+            pipeline_flush <= '0';
+            after_bubble <= '0';
+            instr_queue <= (others => '0');
+        elsif rising_edge(clk) then
             top_data_hazard <= next_top_data_hazard;
             bottom_data_hazard <= next_bottom_data_hazard;
             if after_bubble = '1' or pipeline_flush = '1' or bubble = '1' or branch_taken = '1' then
+                execute_instr <= (others => '0');
+                execute_pc <= (others => '0');
+                immediate <= (others => '0');
                 if pipeline_flush = '1' then
                     pipeline_flush <= '0';
                 end if;
@@ -134,10 +146,6 @@ begin
                     execute_pc <= decode_pc;
                     immediate <= next_immediate;
                     after_bubble <= '0';
-                else
-                    execute_instr <= (others => '0');
-                    execute_pc <= (others => '0');
-                    immediate <= (others => '0');
                 end if; 
             else
                 execute_instr <= decode_instr;

@@ -104,11 +104,11 @@ architecture behavioral of printer is
 
     signal fifo_char : std_logic_vector(7 downto 0);
 
-    signal uart_tx_clk : std_logic;
     signal uart_tx_buffer_read : std_logic;
     signal write_char : std_logic;
     signal uart_queue_empty : std_logic;
     signal uart_char : std_logic_vector(7 downto 0);
+    signal uart_queue_full : std_logic;
     
     signal numerator : std_logic_vector(31 downto 0);
     signal next_numerator : std_logic_vector(31 downto 0);
@@ -170,13 +170,13 @@ begin
     dcfifo1_inst : dcfifo1
         port map (
             data => fifo_char,
-            rdclk => uart_tx_clk,
+            rdclk => tx_clk,
             rdreq => uart_tx_buffer_read,
             wrclk => clk,
             wrreq => write_char,
             q => uart_char,
             rdempty => uart_queue_empty,
-            wrfull => open
+            wrfull => uart_queue_full
         );
 
     UART_tx_inst : UART_tx
