@@ -158,7 +158,7 @@ begin
         end if;
     end process;
 
-    process(decode_instr, execute_instr, memory_instr, rs1, rs2, print_queue_full, input_buffer_empty, opcode) begin
+    process(decode_instr, execute_instr, memory_instr, rs1, rs2, print_queue_full, input_buffer_empty, opcode, instr_queue) begin
         bubble <= '0';
         -- check for data hazards in src1
         if rs1 = execute_instr(25 downto 21) and execute_instr(31 downto 26) = LW then
@@ -188,7 +188,7 @@ begin
         
         --if (print_queue_full = '1' and (opcode = PD or opcode = PDU or opcode = PCH)) or
         --   (input_buffer_empty = '0' and (opcode = GD or opcode = GDU)) then
-        if (input_buffer_empty = '1' and (opcode = GD or opcode = GDU)) then
+        if (input_buffer_empty = '1' and (opcode = GD or opcode = GDU or instr_queue(31 downto 26) = GD or instr_queue(31 downto 26) = GDU)) then
             bubble <= '1'; 
         end if;
         
