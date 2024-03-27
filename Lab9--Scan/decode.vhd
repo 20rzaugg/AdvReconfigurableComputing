@@ -161,7 +161,7 @@ begin
     process(decode_instr, execute_instr, memory_instr, rs1, rs2, print_queue_full, input_buffer_empty, opcode, instr_queue) begin
         bubble <= '0';
         -- check for data hazards in src1
-        if rs1 = execute_instr(25 downto 21) and execute_instr(31 downto 26) = LW then
+        if rs1 = execute_instr(25 downto 21) and (execute_instr(31 downto 26) = LW or execute_instr(31 downto 26) = GD or execute_instr(31 downto 26) = GDU) then
             bubble <= '1';
         elsif rs1 = execute_instr(25 downto 21) and has_writeback(execute_instr(31 downto 26)) = '1' then
             next_top_data_hazard <= RBW_EXMEM;
@@ -174,7 +174,7 @@ begin
         end if;
 
         -- check for data hazards in src2
-        if rs2 = execute_instr(25 downto 21) and execute_instr(31 downto 26) = LW and is_immediate(opcode) = '0' then
+        if rs2 = execute_instr(25 downto 21) and (execute_instr(31 downto 26) = LW or execute_instr(31 downto 26) = GD or execute_instr(31 downto 26) = GDU) and is_immediate(opcode) = '0' then
             bubble <= '1';
         elsif rs2 = execute_instr(25 downto 21) and has_writeback(execute_instr(31 downto 26)) = '1' and is_immediate(opcode) = '0' then
             next_bottom_data_hazard <= RBW_EXMEM;

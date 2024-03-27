@@ -8,7 +8,8 @@ entity DLXpipeline is
         clk : in std_logic;
         rst_l : in std_logic;
         tx : out std_logic;
-        rx : in std_logic
+        rx : in std_logic;
+        LEDR : out std_logic_vector(9 downto 0)
     );
 end DLXpipeline;
 
@@ -281,9 +282,11 @@ begin
             rx_clk => rx_clk,
             rst_l => rst_l, --from system
             rx => rx, --from system
-            instr_in => memory_instr, --from execute ***maybe change to memory_instr***
+            instr_in => execute_instr, --from execute ***maybe change to memory_instr***
             input_buffer_empty => input_buffer_empty, --to decode
             data_out => input_buffer_data --to writeback
         );
+
+    LEDR <= input_buffer_data(9 downto 0);
 
 end behavioral;

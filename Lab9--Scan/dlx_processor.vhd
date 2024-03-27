@@ -22,16 +22,20 @@ architecture behavioral of dlx_processor is
         port (
             clk : in std_logic;
             rst_l : in std_logic;
-            tx : out std_logic
+            tx : out std_logic;
+            rx : in std_logic;
+            LEDR : out std_logic_vector(9 downto 0)
         );
     end component;
 begin
 
     pipeline : DLXpipeline
         port map (
-            clk => MAX10_CLK1_50,
+            clk => ADC_CLK_10,
             rst_l => KEY(0),
-            tx => TX
+            tx => TX,
+            rx => RX,
+            LEDR => LEDR
         );
 
 end behavioral;
