@@ -1,0 +1,47 @@
+1 1 X X X X 1 1
+^ ^         ^ ^
+W P         U I
+r e         n m
+i r         s m
+t i         i e
+e p         g d
+b h         n i
+a e         e a
+c r         d t
+k a           e
+  l
+
+writeback = instruction(63)
+perpheral = instruction(62)
+unsigned = instruction(57)
+immediate = instruction(56)
+
+NOOP 00000000
+SW   0000010X
+BEQZ 00110101
+BNEZ 00111001
+J    0011110X
+PCH  01000000
+PD   010001X0
+TCLR 01100000
+TSRT 01100100
+TSTP 01101000
+
+LW   1000000X
+ADD  100001XX
+SUB  100010XX
+AND  1000110X
+OR   1001000X
+XOR  1001010X
+SLL  1001100X
+SRL  1001110X
+SRA  1010000X
+SGT  101001XX
+SGE  101010XX
+SLT  101011XX
+SLE  101100XX
+SEQ  1011010X
+SNE  1011100X
+JAL  1011110X
+GD   110000X0
+LCM  1110000X
