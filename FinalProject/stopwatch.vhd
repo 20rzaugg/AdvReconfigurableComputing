@@ -80,8 +80,8 @@ begin
     
     process(clk_10k) begin
         if rising_edge(clk_10k) then
-				next_tenms <= tenms;
-			   next_hunms <= hunms;
+			next_tenms <= tenms;
+			next_hunms <= hunms;
             next_onesec <= onesec;
             next_tensec <= tensec;
             next_onemin <= onemin;

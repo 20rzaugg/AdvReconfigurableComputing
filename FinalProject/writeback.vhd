@@ -9,7 +9,7 @@ entity dlx_writeback is
         data_mem_in : in std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
         alu_result_in : in std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
         writeback_data_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
-        writeback_address_out : out std_logic_vector(4 downto 0);
+        writeback_address_out : out std_logic_vector(5 downto 0);
         writeback_enable_out : out std_logic;
         input_buffer_output : in std_logic_vector(DATA_WIDTH-1 downto 0)
     );

@@ -9,18 +9,35 @@ entity DLXpipeline is
         rst_l : in std_logic;
         tx : out std_logic;
         rx : in std_logic;
-        LEDR : out std_logic_vector(9 downto 0)
+        LEDR : out std_logic_vector(9 downto 0);
+        HEX0 : out std_logic_vector(7 downto 0);
+        HEX1 : out std_logic_vector(7 downto 0);
+        HEX2 : out std_logic_vector(7 downto 0);
+        HEX3 : out std_logic_vector(7 downto 0);
+        HEX4 : out std_logic_vector(7 downto 0);
+        HEX5 : out std_logic_vector(7 downto 0)
     );
 end DLXpipeline;
 
 architecture behavioral of DLXpipeline is
 
+    -- 50 MHz input clock
     component pll1 is
         port (
             areset : IN STD_LOGIC  := '0';
 		    inclk0 : IN STD_LOGIC  := '0';
 		    c0 : OUT STD_LOGIC; -- 0.0192 MHz
 		    c1 : OUT STD_LOGIC  -- 0.1536 MHz
+        );
+    end component;
+
+    -- 50 MHz input clock
+    component pll2 is
+        port (
+            areset : IN STD_LOGIC  := '0';
+		    inclk0 : IN STD_LOGIC  := '0';
+		    c0 : OUT STD_LOGIC; -- 0.01 MHz
+		    c1 : OUT STD_LOGIC  -- 100.00 MHz
         );
     end component;
 
@@ -43,20 +60,22 @@ architecture behavioral of DLXpipeline is
             decode_pc : in STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
             decode_instr : in STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
             writeback_data : in STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
-            writeback_reg : in STD_LOGIC_VECTOR (4 downto 0);
+            writeback_reg : in STD_LOGIC_VECTOR (5 downto 0);
             writeback_en : in STD_LOGIC;
             branch_taken : in STD_LOGIC;
             rs1_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
             rs2_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
-            immediate : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
-            execute_instr : inout STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
+            rs3_data : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
+            imm_out : out STD_LOGIC_VECTOR (DATA_WIDTH-1 downto 0);
+            execute_instr : inout STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0) := (others => '0');
             memory_instr : in STD_LOGIC_VECTOR (INSTR_WIDTH-1 downto 0);
-            execute_pc : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0);
+            execute_pc : out STD_LOGIC_VECTOR (ADDR_WIDTH-1 downto 0) := (others => '0');
             bubble : inout STD_LOGIC := '0';
-            top_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
-            bottom_data_hazard : out STD_LOGIC_VECTOR (1 downto 0);
-            print_queue_full : in std_logic;
-            input_buffer_empty : in std_logic
+            data_hazard1 : out STD_LOGIC_VECTOR (1 downto 0);
+            data_hazard2 : out STD_LOGIC_VECTOR (1 downto 0);
+            data_hazard3 : out STD_LOGIC_VECTOR (1 downto 0);
+            print_queue_full : in STD_LOGIC;
+            input_buffer_empty : in STD_LOGIC
         );
     end component;
 
@@ -67,18 +86,23 @@ architecture behavioral of DLXpipeline is
             execute_pc : in std_logic_vector(ADDR_WIDTH-1 downto 0);
             reg_in1 : in std_logic_vector(DATA_WIDTH-1 downto 0);
             reg_in2 : in std_logic_vector(DATA_WIDTH-1 downto 0);
+            reg_in3 : in std_logic_vector(DATA_WIDTH-1 downto 0);
             immediate_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
             execute_instr : in std_logic_vector(INSTR_WIDTH-1 downto 0);
-            alu_result : inout std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
+            alu_result : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
             branch_target : out std_logic_vector(ADDR_WIDTH-1 downto 0) := (others => '0');
             branch_taken : out std_logic := '0';
             memory_instr : out std_logic_vector(INSTR_WIDTH-1 downto 0) := (others => '0');
-            reg2_out : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
-            top_data_hazard : in STD_LOGIC_VECTOR (1 downto 0);
-            bottom_data_hazard : in STD_LOGIC_VECTOR (1 downto 0);
+            reg3_out : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
+            data_hazard1 : in STD_LOGIC_VECTOR(1 downto 0);
+            data_hazard2 : in STD_LOGIC_VECTOR(1 downto 0);
+            data_hazard3 : in STD_LOGIC_VECTOR(1 downto 0);
             fast_track_mw_alu : in std_logic_vector(DATA_WIDTH-1 downto 0);
             fast_track_mw_mem : in std_logic_vector(DATA_WIDTH-1 downto 0);
-            alu_in1 : inout std_logic_vector(DATA_WIDTH-1 downto 0)
+            print_data : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            stopwatch_start : out std_logic := '0';
+            stopwatch_stop : out std_logic := '0';
+            stopwatch_reset : out std_logic := '0';
         );
     end component;
 
@@ -101,7 +125,7 @@ architecture behavioral of DLXpipeline is
             data_mem_in : in std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
             alu_result_in : in std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
             writeback_data_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
-            writeback_address_out : out std_logic_vector(4 downto 0);
+            writeback_address_out : out std_logic_vector(5 downto 0);
             writeback_enable_out : out std_logic;
             input_buffer_output : in std_logic_vector(DATA_WIDTH-1 downto 0)
         );
@@ -131,6 +155,22 @@ architecture behavioral of DLXpipeline is
         );
     end component;
 
+    component stopwatch is
+        port (
+            clk : in std_logic;
+            clk_10k : in std_logic;
+            rst_l : in std_logic; --hw reset
+            t_start : in std_logic;
+            t_stop : in std_logic;
+            rst : in std_logic; --sw reset
+            HEX0 : out unsigned(7 downto 0);
+            HEX1 : out unsigned(7 downto 0);
+            HEX2 : out unsigned(7 downto 0);
+            HEX3 : out unsigned(7 downto 0);
+            HEX4 : out unsigned(7 downto 0);
+            HEX5 : out unsigned(7 downto 0)
+        );
+
     signal decode_pc : std_logic_vector(ADDR_WIDTH-1 downto 0); -- fetch to decode
     signal decode_instr : std_logic_vector(INSTR_WIDTH-1 downto 0); -- fetch to decode
 
@@ -148,16 +188,17 @@ architecture behavioral of DLXpipeline is
     signal execute_alu_result : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal branch_target : std_logic_vector(ADDR_WIDTH-1 downto 0);
 
-    signal reg2_out : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal reg3_out : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal memory_alu_result_out : std_logic_vector(DATA_WIDTH-1 downto 0);
 
     signal execute_immediate : std_logic_vector(DATA_WIDTH-1 downto 0);
 
     signal rs1_data : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal rs2_data : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal rs3_data : std_logic_vector(DATA_WIDTH-1 downto 0);
 
     signal writeback_data : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal writeback_address : std_logic_vector(4 downto 0);
+    signal writeback_address : std_logic_vector(5 downto 0);
     signal writeback_en : std_logic;
     signal bubble : std_logic;
 
@@ -166,7 +207,7 @@ architecture behavioral of DLXpipeline is
 
     signal instr_queue_full : std_logic;
 
-    signal ff_alu_in1 : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal print_data_in : std_logic_vector(DATA_WIDTH-1 downto 0);
 
     signal rx_clk : std_logic;
     signal tx_clk : std_logic;
@@ -174,6 +215,12 @@ architecture behavioral of DLXpipeline is
 
     signal input_buffer_empty : std_logic;
     signal input_buffer_data : std_logic_vector(DATA_WIDTH-1 downto 0);
+
+    signal tim_clk : std_logic;
+    signal t_start : std_logic;
+    signal t_stop : std_logic;
+    signal t_rst : std_logic;
+
 
 begin
 
@@ -185,6 +232,14 @@ begin
             inclk0 => clk,
             c0 => tx_clk,
             c1 => rx_clk
+        );
+    
+    pll2_inst : pll2
+        port map (
+            areset => areset,
+            inclk0 => clk,
+            c0 => tim_clk,
+            c1 => open
         );
 
     fetch : dlx_fetch
@@ -210,15 +265,17 @@ begin
             branch_taken => addr_selector, --from execute
             rs1_data => rs1_data, --to execute
             rs2_data => rs2_data, --to execute
-            immediate => execute_immediate, --to execute
+            rs3_data => rs3_data, --to execute
+            imm_out => execute_immediate, --to execute
             execute_instr => execute_instr, --to execute
             memory_instr => memory_instr,
             execute_pc => execute_pc, --to execute
             bubble => bubble, --to fetch
-            top_data_hazard => top_data_hazard,
-            bottom_data_hazard => bottom_data_hazard,
-            print_queue_full => instr_queue_full,
-            input_buffer_empty => input_buffer_empty
+            data_hazard1 => data_hazard1, --to execute
+            data_hazard2 => data_hazard2, --to execute
+            data_hazard3 => data_hazard3, --to execute
+            print_queue_full => instr_queue_full, --from printer
+            input_buffer_empty => input_buffer_empty --from scanner
         );
 
     execute : dlx_execute
@@ -228,18 +285,23 @@ begin
             execute_pc => execute_pc, --from decode
             reg_in1 => rs1_data, --from decode
             reg_in2 => rs2_data, --from decode
+            reg_in3 => rs3_data, --from decode
             immediate_in => execute_immediate, --from decode
             execute_instr => execute_instr, --from decode
             alu_result => execute_alu_result, --to memory and decode
             branch_target => branch_target, --to fetch
             branch_taken => addr_selector, --to fetch
             memory_instr => memory_instr, --to fetch
-            reg2_out => reg2_out, --to memory
-            top_data_hazard => top_data_hazard,
-            bottom_data_hazard => bottom_data_hazard,
+            reg3_out => reg3_out, --to memory
+            data_hazard1 => data_hazard1, --from decode
+            data_hazard2 => data_hazard2, --from decode
+            data_hazard3 => data_hazard3, --from decode
             fast_track_mw_alu => memory_alu_result_out,
             fast_track_mw_mem => data_mem_out,
-            alu_in1 => ff_alu_in1
+            print_data => print_data_in, --to printer
+            stopwatch_start => t_start, --to stopwatch
+            stopwatch_stop => t_stop, --to stopwatch
+            stopwatch_reset => t_rst --to stopwatch
         );
 
     memory : dlx_memory
@@ -271,7 +333,7 @@ begin
             tx_clk => tx_clk,
             rst_l => rst_l, --from system
             instr_in => execute_instr, --from decode
-            data_in => ff_alu_in1, --from decode
+            data_in => print_data_in, --from decode
             instr_queue_full => instr_queue_full, --to decode
             tx => tx --to system
         );
@@ -282,11 +344,25 @@ begin
             rx_clk => rx_clk,
             rst_l => rst_l, --from system
             rx => rx, --from system
-            instr_in => execute_instr, --from execute ***maybe change to memory_instr***
+            instr_in => execute_instr, --from execute
             input_buffer_empty => input_buffer_empty, --to decode
             data_out => input_buffer_data --to writeback
         );
 
-    LEDR <= input_buffer_data(9 downto 0);
+    stopwatch1 : stopwatch
+        port map (
+            clk => clk, --from system
+            clk_10k => tim_clk, --from pll
+            rst_l => rst_l, --from system
+            t_start => t_start, --from execute
+            t_stop => t_stop, --from execute
+            rst => t_rst, --from execute
+            HEX0 => HEX0, --to system
+            HEX1 => HEX1, --to system
+            HEX2 => HEX2, --to system
+            HEX3 => HEX3, --to system
+            HEX4 => HEX4, --to system
+            HEX5 => HEX5 --to system
+        );
 
 end behavioral;

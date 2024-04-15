@@ -10,11 +10,11 @@ instruction_set = {
                  },
      "LW":    {
                      "opcode": "10000001",
-                     "operands": [dest_reg, src_reg2, src_reg1]
+                     "operands": [dest_reg, imm, src_reg1]
                  },
      "LWP":    {
                      "opcode": "10000000",
-                     "operands": [dest_reg, imm, src_reg1]
+                     "operands": [dest_reg, src_reg2, src_reg1]
                  },
      "SW":    {
                      "opcode": "00000101",

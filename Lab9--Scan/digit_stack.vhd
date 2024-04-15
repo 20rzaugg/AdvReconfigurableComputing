@@ -17,9 +17,9 @@ entity digit_stack is
 end digit_stack;
 
 architecture behavioral of digit_stack is
-    type stack_type is array (0 to 10) of std_logic_vector(7 downto 0);
+    type stack_type is array (0 to 31) of std_logic_vector(7 downto 0);
     signal stack : stack_type;
-    signal top : integer range 0 to 10 := 0;
+    signal top : integer range 0 to 31 := 0;
 begin
     process(clk, rst_l)
     begin
@@ -27,7 +27,7 @@ begin
             top <= 0;
         elsif rising_edge(clk) then
             if push = '1' then
-                if top < 10 then
+                if top < 31 then
                     stack(top) <= data_in;
                     top <= top + 1;
                 end if;
