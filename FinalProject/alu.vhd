@@ -10,7 +10,7 @@ entity ALU is
         rst_l : in std_logic;
         in1 : in std_logic_vector(DATA_WIDTH-1 downto 0);
         in2 : in std_logic_vector(DATA_WIDTH-1 downto 0);
-        opcode : in std_logic_vector(7 downto 0);
+        op : in std_logic_vector(7 downto 0);
         out1 : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0')
     );
 end ALU;
@@ -40,7 +40,7 @@ begin
         MUX_WIDTH => DATA_WIDTH
     )
     port map (
-        sel => opcode(1),
+        sel => op(1),
         in0 => signed_result,
         in1 => unsigned_result,
         out0 => next_out1
@@ -54,39 +54,39 @@ begin
         end if;
     end process;
 
-    process(opcode, in1, in2) begin
-        case opcode is
-            when SW =>
+    process(op, in1, in2) begin
+        case op(7 downto 2) is
+            when SW(7 downto 2) =>
                 signed_result <= std_logic_vector(unsigned(in1) + unsigned(in2));
-                unsigned_result <= (others => '-');
-            when LW =>
+                unsigned_result <= (others => 'X');
+            when LW(7 downto 2) =>
                 signed_result <= std_logic_vector(unsigned(in1) + unsigned(in2));
-                unsigned_result <= (others => '-');
-            when ADDx =>
+                unsigned_result <= (others => 'X');
+            when ADDx(7 downto 2) =>
                 signed_result <= std_logic_vector(signed(in1) + signed(in2));
                 unsigned_result <= std_logic_vector(unsigned(in1) + unsigned(in2));
-            when SUBx =>
+            when SUBx(7 downto 2) =>
                 signed_result <= std_logic_vector(signed(in1) - signed(in2));
                 unsigned_result <= std_logic_vector(unsigned(in1) - unsigned(in2));
-            when ANDx =>
+            when ANDx(7 downto 2) =>
                 signed_result <= in1 and in2;
-                unsigned_result <= (others => '-');
-            when ORx =>
+                unsigned_result <= (others => 'X');
+            when ORx(7 downto 2) =>
                 signed_result <= in1 or in2;
-                unsigned_result <= (others => '-');
-            when XORx =>
+                unsigned_result <= (others => 'X');
+            when XORx(7 downto 2) =>
                 signed_result <= in1 xor in2;
-                unsigned_result <= (others => '-');
-            when SLLx =>
+                unsigned_result <= (others => 'X');
+            when SLLx(7 downto 2) =>
                 signed_result <= std_logic_vector(shift_left(unsigned(in1), to_integer(unsigned(in2))));
-                unsigned_result <= (others => '-');
-            when SRLx =>
+                unsigned_result <= (others => 'X');
+            when SRLx(7 downto 2) =>
                 signed_result <= std_logic_vector(shift_right(unsigned(in1), to_integer(unsigned(in2))));
-                unsigned_result <= (others => '-');
-            when SRAx =>
+                unsigned_result <= (others => 'X');
+            when SRAx(7 downto 2) =>
                 signed_result <= arithmetic_right_shift(in1, to_integer(signed(in2)));
-                unsigned_result <= (others => '-');
-            when SLT =>
+                unsigned_result <= (others => 'X');
+            when SLT(7 downto 2) =>
                 if signed(in1) < signed(in2) then
                     signed_result <= x"0000000000000001";
                 else
@@ -97,7 +97,7 @@ begin
                 else
                     unsigned_result <= (others => '0');
                 end if;
-            when SGT =>
+            when SGT(7 downto 2) =>
                 if signed(in1) > signed(in2) then
                     signed_result <= x"0000000000000001";
                 else
@@ -108,7 +108,7 @@ begin
                 else
                     unsigned_result <= (others => '0');
                 end if;
-            when SLE => 
+            when SLE(7 downto 2) => 
                 if signed(in1) <= signed(in2) then
                     signed_result <= x"0000000000000001";
                 else
@@ -119,7 +119,7 @@ begin
                 else
                     unsigned_result <= (others => '0');
                 end if;
-            when SGE => 
+            when SGE(7 downto 2) => 
                 if signed(in1) >= signed(in2) then
                     signed_result <= x"0000000000000001";
                 else
@@ -130,12 +130,12 @@ begin
                 else
                     unsigned_result <= (others => '0');
                 end if;
-            when JAL =>
+            when JAL(7 downto 2) =>
                 signed_result <= in1;
-                unsigned_result <= (others => '-');
+                unsigned_result <= (others => 'X');
             when others =>
-                signed_result <= (others => '-');
-                unsigned_result <= (others => '-');
+                signed_result <= (others => 'X');
+                unsigned_result <= (others => 'X');
         end case;
     end process;
 end Behavioral;

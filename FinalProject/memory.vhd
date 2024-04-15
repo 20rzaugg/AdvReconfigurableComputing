@@ -36,7 +36,7 @@ begin
     data_mem_inst : data_mem
     port map
     (
-        address => alu_result_in(9 downto 0),
+        address => alu_result_in(11 downto 0),
         clock => clk,
         data => data_in,
         wren => wren,
@@ -58,7 +58,7 @@ begin
             wren <= '0';
         else
             wren <= '0';
-            if instr_in(63 downto 56) = SW then
+            if opcode(instr_in) = SW then
                 wren <= '1';
             end if;
         end if;

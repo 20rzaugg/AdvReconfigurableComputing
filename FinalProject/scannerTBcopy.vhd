@@ -4,29 +4,19 @@ use IEEE.numeric_std.all;
 library work;
 use work.dlxlib.all;
 
-entity scanner is
+entity scannerTBcopy is
     port (
         clk : in std_logic;
-        rx_clk : in std_logic;
         rst_l : in std_logic;
-        rx : in std_logic;
         instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
         input_buffer_empty : inout std_logic;
-        data_out : out std_logic_vector(DATA_WIDTH-1 downto 0)
+        data_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        rx_data : in std_logic_vector(7 downto 0);
+        rx_done : in std_logic
     );
-end entity scanner; 
+end entity scannerTBcopy; 
 
-architecture behavioral of scanner is
-
-    component UART_rx is
-        port (
-            clk : in  STD_LOGIC;
-            rst_l : in  STD_LOGIC;
-            rx : in  STD_LOGIC;
-            rx_data : out  STD_LOGIC_VECTOR (7 downto 0);
-            rx_done : out  STD_LOGIC
-        );
-    end component;
+architecture behavioral of scannerTBcopy is
 
     component dcfifo1 is
         port (
@@ -78,9 +68,6 @@ architecture behavioral of scanner is
     signal neg_flag : std_logic := '0';
     signal next_neg_flag : std_logic := '0';
 
-    signal rx_data : std_logic_vector(7 downto 0);
-    signal rx_done : std_logic;
-
     signal dcfifo_out : std_logic_vector(7 downto 0);
     signal rdempty : std_logic;
     signal wrfull : std_logic;
@@ -99,21 +86,12 @@ begin
     input_buffer_data <= neg_flag & total;
     sclr <= not rst_l;
 
-    UART_rx_inst : UART_rx
-        port map (
-            clk => rx_clk,
-            rst_l => rst_l,
-            rx => rx,
-            rx_data => rx_data,
-            rx_done => rx_done
-        );
-
     dcfifo1_inst : dcfifo1
         port map (
             data => rx_data,
             rdclk => clk,
             rdreq => rdchar,
-            wrclk => rx_clk,
+            wrclk => clk,
             wrreq => rx_done,
             q => dcfifo_out,
             rdempty => rdempty,

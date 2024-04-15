@@ -204,7 +204,7 @@ begin
         end if;
 
         -- handle "print buffer full" and "scan buffer empty"
-        if (input_buffer_empty = '1' and (op = GD or opcode(instr_queue) = GD)) or (print_queue_full = '1' and (opcode = PD or opcode = PCH)) then
+        if (input_buffer_empty = '1' and (op = GD or opcode(instr_queue) = GD)) or (print_queue_full = '1' and (op = PD or op = PCH)) then
             bubble <= '1';
         end if;
         

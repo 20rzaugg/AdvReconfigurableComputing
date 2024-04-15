@@ -163,7 +163,6 @@ BEGIN\n\n""")
                                         exit(1)
                             else:
                                 pass
-                        print(b)
                         x = format(int(b,2),'016X')
                         a = format(instruction_address, '03X')
                         output_file.write(a + " : " + x + ";\t\t-- " + line.replace('\t\t',' ') + "\n")

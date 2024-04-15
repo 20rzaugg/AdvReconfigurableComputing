@@ -1,46 +1,27 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
+use IEEE.numeric_std.all;
 library work;
 use work.dlxlib.all;
 
-entity DLXpipeline is
+entity DLXpipelineTBcopy is
     port (
         clk : in std_logic;
         rst_l : in std_logic;
         tx : out std_logic;
-        rx : in std_logic;
         LEDR : out std_logic_vector(9 downto 0);
         HEX0 : out unsigned(7 downto 0);
         HEX1 : out unsigned(7 downto 0);
         HEX2 : out unsigned(7 downto 0);
         HEX3 : out unsigned(7 downto 0);
         HEX4 : out unsigned(7 downto 0);
-        HEX5 : out unsigned(7 downto 0)
+        HEX5 : out unsigned(7 downto 0);
+        rx_data : in std_logic_vector(7 downto 0);
+        rx_done : in std_logic
     );
-end DLXpipeline;
+end DLXpipelineTBcopy;
 
-architecture behavioral of DLXpipeline is
-
-    -- 50 MHz input clock
-    component pll1 is
-        port (
-            areset : IN STD_LOGIC  := '0';
-		    inclk0 : IN STD_LOGIC  := '0';
-		    c0 : OUT STD_LOGIC; -- 0.0192 MHz
-		    c1 : OUT STD_LOGIC  -- 0.1536 MHz
-        );
-    end component;
-
-    -- 50 MHz input clock
-    component pll2 is
-        port (
-            areset : IN STD_LOGIC  := '0';
-		    inclk0 : IN STD_LOGIC  := '0';
-		    c0 : OUT STD_LOGIC; -- 0.01 MHz
-		    c1 : OUT STD_LOGIC  -- 100.00 MHz
-        );
-    end component;
+architecture behavioral of DLXpipelineTBcopy is
 
     component dlx_fetch is
         port (
@@ -144,15 +125,15 @@ architecture behavioral of DLXpipeline is
         );
     end component;
 
-    component scanner is
+    component scannerTBcopy is
         port (
             clk : in std_logic;
-            rx_clk : in std_logic;
             rst_l : in std_logic;
-            rx : in std_logic;
             instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
             input_buffer_empty : inout std_logic;
-            data_out : out std_logic_vector(DATA_WIDTH-1 downto 0)
+            data_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            rx_data : in std_logic_vector(7 downto 0);
+            rx_done : in std_logic
         );
     end component;
 
@@ -226,24 +207,6 @@ architecture behavioral of DLXpipeline is
 
 
 begin
-
-    areset <= not rst_l;
-
-    pll1_inst : pll1
-        port map (
-            areset => areset,
-            inclk0 => clk,
-            c0 => tx_clk,
-            c1 => rx_clk
-        );
-    
-    pll2_inst : pll2
-        port map (
-            areset => areset,
-            inclk0 => clk,
-            c0 => tim_clk,
-            c1 => open
-        );
 
     fetch : dlx_fetch
         port map (
@@ -333,7 +296,7 @@ begin
     printer1 : printer
         port map (
             clk => clk, --from system
-            tx_clk => tx_clk,
+            tx_clk => clk,
             rst_l => rst_l, --from system
             instr_in => execute_instr, --from decode
             data_in => print_data_in, --from decode
@@ -341,21 +304,21 @@ begin
             tx => tx --to system
         );
 
-    scanner1 : scanner
+    scanner1 : scannerTBcopy
         port map (
             clk => clk, --from system
-            rx_clk => rx_clk,
             rst_l => rst_l, --from system
-            rx => rx, --from system
             instr_in => execute_instr, --from execute
             input_buffer_empty => input_buffer_empty, --to decode
-            data_out => input_buffer_data --to writeback
+            data_out => input_buffer_data, --to writeback
+            rx_data => rx_data, --from system
+            rx_done => rx_done --from system
         );
 
     stopwatch1 : stopwatch
         port map (
             clk => clk, --from system
-            clk_10k => tim_clk, --from pll
+            clk_10k => clk, --from pll
             rst_l => rst_l, --from system
             t_start => t_start, --from execute
             t_stop => t_stop, --from execute

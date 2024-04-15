@@ -16,7 +16,7 @@ entity register_mem is
         write_en : in std_logic := '0';
         read_q1 : out std_logic_vector(DATA_WIDTH-1 downto 0);
         read_q2 : out std_logic_vector(DATA_WIDTH-1 downto 0);
-        read_q3 : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        read_q3 : out std_logic_vector(DATA_WIDTH-1 downto 0)
     );
     
 end entity;

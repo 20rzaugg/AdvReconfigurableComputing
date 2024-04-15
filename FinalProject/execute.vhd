@@ -26,7 +26,7 @@ entity dlx_execute is
         print_data : out std_logic_vector(DATA_WIDTH-1 downto 0);
         stopwatch_start : out std_logic := '0';
         stopwatch_stop : out std_logic := '0';
-        stopwatch_reset : out std_logic := '0';
+        stopwatch_reset : out std_logic := '0'
     );
 end dlx_execute;
 
@@ -74,6 +74,7 @@ architecture hierarchial of dlx_execute is
     signal mux1_sel : std_logic;
     signal mux2_sel : std_logic;
 
+    signal alu_in1 : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal alu_in2 : std_logic_vector(DATA_WIDTH-1 downto 0);
 
     signal op : std_logic_vector(7 downto 0);
@@ -113,8 +114,8 @@ begin
         )
         port map (
             sel => mux1_sel,
-            in0 => expanded_address,
-            in1 => reg1_ff,
+            in0 => reg1_ff,
+            in1 => expanded_address,
             out0 => alu_in1
         );
 
@@ -170,7 +171,7 @@ begin
         if op = JAL then
             mux1_sel <= '1';
         else
-            op <= '0';
+            mux1_sel <= '0';
         end if;
         mux2_sel <= is_immediate(op);
 
@@ -200,7 +201,7 @@ begin
     process (op, reg1_ff, alu_in2) is
     begin
         if op = BEQZ or op = BNEZ or op = J or op = JAL then
-            branch_target <= alu_in_2(ADDR_WIDTH-1 downto 0)
+            branch_target <= alu_in2(ADDR_WIDTH-1 downto 0);
         else
             branch_target <= (others => '0');
         end if;
