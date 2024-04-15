@@ -80,8 +80,8 @@ if __name__ == "__main__":
     input_file.seek(0)
     output_file = open(text_output_file_name, "w")
     output_file.write(
-"""DEPTH = 1024; 
-WIDTH = 32; 
+"""DEPTH = 4096; 
+WIDTH = 64; 
 ADDRESS_RADIX = HEX; 
 DATA_RADIX = HEX; 
 CONTENT 
@@ -114,46 +114,46 @@ BEGIN\n\n""")
                         b = instruction_set[K]["opcode"] + b[8:]
                         arg = 1
                         for i in instruction_set[K]["operands"]:
-                            if i[0] == dest_reg:
+                            if i == dest_reg:
                                 if k[arg].upper() in register_set.keys():
                                     b = b[0:8] + register_set[k[arg].upper()] + b[14:]
                                     arg += 1
                                 else:
                                     print("Error: Invalid register name\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                                     exit(1)
-                            elif i[0] == src_reg1:
+                            elif i == src_reg1:
                                 if k[arg].upper() in register_set.keys():
                                     b = b[0:14] + register_set[k[arg].upper()] + b[20:]
                                     arg += 1
                                 else:
                                     print("Error: Invalid register name\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                                     exit(1)
-                            elif i[0] == src_reg2:
+                            elif i == src_reg2:
                                 if k[arg].upper() in register_set.keys():
                                     b = b[0:20] + register_set[k[arg].upper()] + b[26:]
                                     arg += 1
                                 else:
                                     print("Error: Invalid register name\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                                     exit(1)
-                            elif i[0] == src_reg3:
+                            elif i == src_reg3:
                                 if k[arg].upper() in register_set.keys():
                                     b = b[0:26] + register_set[k[arg].upper()] + b[32:]
                                     arg += 1
                                 else:
                                     print("Error: Invalid register name\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
                                     exit(1)
-                            elif i[0] == imm:
+                            elif i == imm:
                                 if k[arg] in data_memory_table.keys():
-                                    b = b[0:32] + format(data_memory_table[k[arg]][0], '016b')
+                                    b = b[0:32] + format(data_memory_table[k[arg]][0], '032b')
                                     arg += 1
                                 elif k[arg].upper() in instruction_memory_table.keys():
-                                    b = b[0:32] + format(instruction_memory_table[k[arg].upper()], '016b')
+                                    b = b[0:32] + format(instruction_memory_table[k[arg].upper()], '032b')
                                     arg += 1
                                 else:
                                     try:
                                         x = int(k[arg])
                                         if x >= 0 and x < 4294967296:
-                                            b = b[0:16] + format(x, '016b')
+                                            b = b[0:32] + format(x, '032b')
                                             arg += 1
                                         else:
                                             print("Error: Immediate out of range\nline "+str(line_number) + ": " + line.replace('\t\t',' '))
@@ -163,7 +163,8 @@ BEGIN\n\n""")
                                         exit(1)
                             else:
                                 pass
-                        x = format(int(b,2),'08X')
+                        print(b)
+                        x = format(int(b,2),'016X')
                         a = format(instruction_address, '03X')
                         output_file.write(a + " : " + x + ";\t\t-- " + line.replace('\t\t',' ') + "\n")
                         instruction_address += 1
@@ -174,8 +175,8 @@ BEGIN\n\n""")
     output_file = open(data_output_file_name, "w")
     data_memory_address = 0
     output_file.write(
-"""DEPTH = 1024; 
-WIDTH = 32; 
+"""DEPTH = 4096; 
+WIDTH = 64; 
 ADDRESS_RADIX = HEX; 
 DATA_RADIX = HEX; 
 CONTENT 
@@ -185,13 +186,13 @@ BEGIN\n\n""")
         if len(data_memory_table[i][1]) > 1:
             for x in data_memory_table[i][1]:
                 a = format(data_memory_address, '03X')
-                x = format(int(x),'08X')
+                x = format(int(x),'016X')
                 output_file.write(a + " : " + x + ";\t\t-- " + i + "[" + str(index) + "]\n")
                 data_memory_address += 1
                 index += 1
         else:
             a = format(data_memory_address, '03X')
-            x = format(int(data_memory_table[i][1][0]),'08X')
+            x = format(int(data_memory_table[i][1][0]),'016X')
             output_file.write(a + " : " + x + ";\t\t-- " + i + "\n")
             data_memory_address += 1
         

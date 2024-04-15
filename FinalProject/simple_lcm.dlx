@@ -28,12 +28,12 @@ sortloop
     ; If the input is less than the current pointer, swap them
     SGTU R10, R5, R3
     BEQZ R10, sortloopdone
-    SW R5, inputs(R2)
+    SW inputs(R2), R5 
     SUBI R2, R2, 1
     J sortloop
 sortloopdone
     ; formally place the new value in memory
-    SW R3, inputs(R2)
+    SW inputs(R2), R3 
     ADDI R1, R1, 1
     J inputloop
 inputloopdone
@@ -48,7 +48,7 @@ intermediatesloop
     LW R1, inputs(R12)
     LW R2, inputs(R13)
     JAL lcmfunc
-    SW R3, intermediates(R12)
+    SW intermediates(R12), R3
     ADDI R12, R12, 1
     SUBI R13, R13, 1
     J intermediatesloop
@@ -62,7 +62,7 @@ finalsloop
     LW R1, intermediates(R12)
     LW R2, intermediates(R13)
     JAL lcmfunc
-    SW R3, finals(R12)
+    SW finals(R12), R3 
     ADDI R12, R12, 1
     SUBI R13, R13, 1
     J finalsloop
@@ -75,7 +75,7 @@ finalsloopdone
     ADDI R12, R0, 1
     LW R2, finals(R12)
     JAL lcmfunc
-    SW R3, result(R0)
+    SW result(R0), R3
     J exit
 
 ; assumes input R1, R2 outputs to R3
