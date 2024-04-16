@@ -162,14 +162,14 @@ begin
         end if;
     end process;
 
-    process(decode_instr, execute_instr, memory_instr, rs1, rs2, print_queue_full, input_buffer_empty, op, instr_queue) begin
+    process(decode_instr, execute_instr, memory_instr, rs1, rs2, print_queue_full, input_buffer_empty, op, instr_queue, branch_taken) begin
         bubble <= '0';
         -- check for data hazards in src1
-        if rs1 = regdest(execute_instr) and (opcode(execute_instr) = LW or opcode(execute_instr) = GD) then
+        if rs1 = regdest(execute_instr) and (op_cmp(opcode(execute_instr), LW) or op_cmp(opcode(execute_instr), GD)) then
             bubble <= '1';
         elsif rs1 = regdest(execute_instr) and has_writeback(opcode(execute_instr)) = '1' then
             next_data_hazard1 <= RBW_EXMEM;
-        elsif rs1 = regdest(memory_instr) and opcode(memory_instr) = LW then
+        elsif rs1 = regdest(memory_instr) and op_cmp(opcode(memory_instr), LW) then
             next_data_hazard1 <= RBW_MEMWB_MEM;
         elsif rs1 = regdest(memory_instr) and has_writeback(opcode(memory_instr)) = '1' then
             next_data_hazard1 <= RBW_MEMWB_ALU;
@@ -178,11 +178,11 @@ begin
         end if;
 
         -- check for data hazards in src2
-        if rs2 = regdest(execute_instr) and (opcode(execute_instr) = LW or opcode(execute_instr) = GD) then
+        if rs2 = regdest(execute_instr) and (op_cmp(opcode(execute_instr), LW) or op_cmp(opcode(execute_instr), GD)) then
             bubble <= '1';
         elsif rs2 = regdest(execute_instr) and has_writeback(opcode(execute_instr)) = '1' then
             next_data_hazard2 <= RBW_EXMEM;
-        elsif rs2 = regdest(memory_instr) and opcode(memory_instr) = LW then
+        elsif rs2 = regdest(memory_instr) and op_cmp(opcode(memory_instr), LW) then
             next_data_hazard2 <= RBW_MEMWB_MEM;
         elsif rs2 = regdest(memory_instr) and has_writeback(opcode(memory_instr)) = '1' then
             next_data_hazard2 <= RBW_MEMWB_ALU;
@@ -191,11 +191,11 @@ begin
         end if;
         
         -- check for data hazards in src3
-        if rs3 = regdest(execute_instr) and (opcode(execute_instr) = LW or opcode(execute_instr) = GD) then
+        if rs3 = regdest(execute_instr) and (op_cmp(opcode(execute_instr), LW) or op_cmp(opcode(execute_instr), GD)) then
             bubble <= '1';
         elsif rs3 = regdest(execute_instr) and has_writeback(opcode(execute_instr)) = '1' then
             next_data_hazard3 <= RBW_EXMEM;
-        elsif rs3 = regdest(memory_instr) and opcode(memory_instr) = LW then
+        elsif rs3 = regdest(memory_instr) and op_cmp(opcode(memory_instr), LW) then
             next_data_hazard3 <= RBW_MEMWB_MEM;
         elsif rs3 = regdest(memory_instr) and has_writeback(opcode(memory_instr)) = '1' then
             next_data_hazard3 <= RBW_MEMWB_ALU;
@@ -204,7 +204,7 @@ begin
         end if;
 
         -- handle "print buffer full" and "scan buffer empty"
-        if (input_buffer_empty = '1' and (op = GD or opcode(instr_queue) = GD)) or (print_queue_full = '1' and (op = PD or op = PCH)) then
+        if branch_taken = '0' and ((input_buffer_empty = '1' and (op_cmp(op, GD) or op_cmp(opcode(instr_queue), GD))) or (print_queue_full = '1' and (op_cmp(op, PD) or op_cmp(op, PCH)))) then
             bubble <= '1';
         end if;
         

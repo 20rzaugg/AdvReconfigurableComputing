@@ -193,7 +193,7 @@ begin
         input_buffer_read <= '0';
         case rd_state is
             when IDLE =>
-                if (opcode(instr_in) = GD) and input_buffer_empty = '0' then
+                if (op_cmp(opcode(instr_in), GD)) and input_buffer_empty = '0' then
                     next_rd_state <= DEQUEUE;
                     input_buffer_read <= '1';
                 else

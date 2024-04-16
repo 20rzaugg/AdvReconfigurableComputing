@@ -53,20 +53,20 @@ begin
     
     process(instr_in) begin
         -- Select writeback source (memory, scanner, or ALU)
-        if instr_in(63 downto 56) = LW then
+        if op_cmp(opcode(instr_in), LW) then
             mux_selector <= "00";
-        elsif instr_in(63 downto 56) = GD then
+        elsif op_cmp(opcode(instr_in), GD) then
             mux_selector <= "01";
         else
             mux_selector <= "10";
         end if;
 
         -- Select target register for write
-        if instr_in(63 downto 56) = JAL then
+        if op_cmp(opcode(instr_in), JAL) then
             writeback_address_out <= "111111"; -- link register = 63
             --Note to self: we can remove this logic if we hardcode all JAL instructions to have dest reg 63
         else
-            writeback_address_out <= instr_in(55 downto 50);
+            writeback_address_out <= regdest(instr_in);
         end if;
     end process;
 

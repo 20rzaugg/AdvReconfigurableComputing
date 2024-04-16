@@ -93,7 +93,7 @@ begin
     alu_result <= alu_result_sig;
     print_data <= reg1_ff;
     op <= opcode(execute_instr);
-    expanded_address <= X"0000000000000" & execute_pc;
+    expanded_address <= "000000000000000000000000000000000000000000000000000000" & execute_pc;
 
     muxinput1_1 : MUX4_1
         generic map (
@@ -168,7 +168,7 @@ begin
 
     process(op) begin
         -- handle execute mux selects
-        if op = JAL then
+        if op_cmp(op, JAL) then
             mux1_sel <= '1';
         else
             mux1_sel <= '0';
@@ -179,11 +179,11 @@ begin
         stopwatch_reset <= '0';
         stopwatch_start <= '0';
         stopwatch_stop <= '0';
-        if op = TCLR then
+        if op_cmp(op, TCLR) then
             stopwatch_reset <= '1';
-        elsif op = TSRT then
+        elsif op_cmp(op, TSRT) then
             stopwatch_start <= '1';
-        elsif op = TSTP then
+        elsif op_cmp(op, TSTP) then
             stopwatch_stop <= '1';
         end if;
     end process;
@@ -200,12 +200,12 @@ begin
 
     process (op, reg1_ff, alu_in2) is
     begin
-        if op = BEQZ or op = BNEZ or op = J or op = JAL then
+        if op_cmp(op, BEQZ) or op_cmp(op, BNEZ) or op_cmp(op, J) or op_cmp(op, JAL) then
             branch_target <= alu_in2(ADDR_WIDTH-1 downto 0);
         else
             branch_target <= (others => '0');
         end if;
-        if (op = BEQZ and reg1_ff = x"0000000000000000") or (op = BNEZ and reg1_ff /= x"0000000000000000") or op = J or op = JAL then
+        if (op_cmp(op, BEQZ) and reg1_ff = x"0000000000000000") or (op_cmp(op, BNEZ) and reg1_ff /= x"0000000000000000") or op_cmp(op, J) or op_cmp(op, JAL) then
             branch_taken <= '1';
         else
             branch_taken <= '0';
@@ -213,3 +213,5 @@ begin
     end process;
 
 end hierarchial;
+
+--13500ns

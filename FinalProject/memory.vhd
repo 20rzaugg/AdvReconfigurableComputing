@@ -21,7 +21,7 @@ architecture hierarchial of dlx_memory is
     component data_mem is
         port
         (
-            address : IN STD_LOGIC_VECTOR (11 DOWNTO 0);
+            address : IN STD_LOGIC_VECTOR (9 DOWNTO 0);
             clock : IN STD_LOGIC  := '1';
             data : IN STD_LOGIC_VECTOR (63 DOWNTO 0);
             wren : IN STD_LOGIC ;
@@ -36,7 +36,7 @@ begin
     data_mem_inst : data_mem
     port map
     (
-        address => alu_result_in(11 downto 0),
+        address => alu_result_in(ADDR_WIDTH-1 downto 0),
         clock => clk,
         data => data_in,
         wren => wren,
@@ -58,7 +58,7 @@ begin
             wren <= '0';
         else
             wren <= '0';
-            if opcode(instr_in) = SW then
+            if op_cmp(opcode(instr_in), SW) then
                 wren <= '1';
             end if;
         end if;

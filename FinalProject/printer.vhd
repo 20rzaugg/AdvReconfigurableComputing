@@ -214,9 +214,9 @@ begin
                     next_state <= IDLE;
                 end if;
             when READQ =>
-                if instr_queue_out(71 downto 64) = PCH then
+                if op_cmp(instr_queue_out(71 downto 64), PCH) then
                     next_state <= PCHAR;
-                elsif instr_queue_out(71 downto 64) = PD then
+                elsif op_cmp(instr_queue_out(71 downto 64), PD) then
                     next_state <= DIVIDEx;
                     next_numerator <= instr_queue_out(63 downto 0);
                 else
@@ -274,6 +274,6 @@ begin
         end case;
 	 end process;
 
-    instr_write <= '1' when opcode(instr_in) = PCH or opcode(instr_in) = PD else '0';
+    instr_write <= '1' when op_cmp(opcode(instr_in), PCH) or op_cmp(opcode(instr_in), PD) else '0';
 
 end behavioral;

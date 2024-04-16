@@ -22,7 +22,7 @@ architecture hierarchial of dlx_fetch is
     component instruction_mem is
         port
         (
-            address	: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
+            address	: IN STD_LOGIC_VECTOR (9 DOWNTO 0);
             clock : IN STD_LOGIC  := '1';
             q : OUT STD_LOGIC_VECTOR (63 DOWNTO 0)
         );
@@ -66,7 +66,7 @@ begin
     addr_adder_inst : addr_adder
         port map (
             addr => unsigned(fetch_pc),
-            offset => "000000000001",
+            offset => "0000000001",
             result => mux_in,
             bubble => bubble
         );
