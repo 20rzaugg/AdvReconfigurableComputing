@@ -32,15 +32,15 @@ architecture behavioral of DLXpipeline is
         );
     end component;
 
-    -- 50 MHz input clock
-    component pll2 is
-        port (
-            areset : IN STD_LOGIC  := '0';
-		    inclk0 : IN STD_LOGIC  := '0';
-		    c0 : OUT STD_LOGIC; -- 0.01 MHz
-		    c1 : OUT STD_LOGIC  -- 100.00 MHz
-        );
-    end component;
+--    -- 50 MHz input clock
+--    component pll2 is
+--        port (
+--            areset : IN STD_LOGIC  := '0';
+--		    inclk0 : IN STD_LOGIC  := '0';
+--		    c0 : OUT STD_LOGIC; -- 0.01 MHz
+--		    c1 : OUT STD_LOGIC  -- 100.00 MHz
+--        );
+--    end component;
 
     component dlx_fetch is
         port (
@@ -159,7 +159,6 @@ architecture behavioral of DLXpipeline is
     component stopwatch is
         port (
             clk : in std_logic;
-            clk_10k : in std_logic;
             rst_l : in std_logic; --hw reset
             t_start : in std_logic;
             t_stop : in std_logic;
@@ -237,13 +236,13 @@ begin
             c1 => rx_clk
         );
     
-    pll2_inst : pll2
-        port map (
-            areset => areset,
-            inclk0 => clk,
-            c0 => tim_clk,
-            c1 => open
-        );
+--    pll2_inst : pll2
+--        port map (
+--            areset => areset,
+--            inclk0 => clk,
+--            c0 => tim_clk,
+--            c1 => open
+--        );
 
     fetch : dlx_fetch
         port map (
@@ -355,7 +354,6 @@ begin
     stopwatch1 : stopwatch
         port map (
             clk => clk, --from system
-            clk_10k => tim_clk, --from pll
             rst_l => rst_l, --from system
             t_start => t_start, --from execute
             t_stop => t_stop, --from execute

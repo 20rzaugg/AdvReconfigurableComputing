@@ -197,10 +197,8 @@ set_global_assignment -name VHDL_FILE printer.vhd
 set_global_assignment -name VHDL_FILE print_instr_queue.vhd
 set_global_assignment -name QIP_FILE print_instr_queue.qip
 set_global_assignment -name SOURCE_FILE print_instr_queue.cmp
-set_global_assignment -name VHDL_FILE pll2.vhd
 set_global_assignment -name QIP_FILE pll2.qip
 set_global_assignment -name SOURCE_FILE pll2.cmp
-set_global_assignment -name VHDL_FILE pll1.vhd
 set_global_assignment -name QIP_FILE pll1.qip
 set_global_assignment -name SOURCE_FILE pll1.cmp
 set_global_assignment -name VHDL_FILE mux4_1.vhd

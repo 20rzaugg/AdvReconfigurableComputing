@@ -140,7 +140,6 @@ architecture behavioral of DLXpipelineTBcopy is
     component stopwatch is
         port (
             clk : in std_logic;
-            clk_10k : in std_logic;
             rst_l : in std_logic; --hw reset
             t_start : in std_logic;
             t_stop : in std_logic;
@@ -318,7 +317,6 @@ begin
     stopwatch1 : stopwatch
         port map (
             clk => clk, --from system
-            clk_10k => clk, --from pll
             rst_l => rst_l, --from system
             t_start => t_start, --from execute
             t_stop => t_stop, --from execute

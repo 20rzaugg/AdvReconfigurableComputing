@@ -42,7 +42,8 @@ begin
 
     pipeline : DLXpipeline
         port map (
-            clk => MAX10_CLK1_50,
+            --clk => MAX10_CLK1_50,
+            clk => ADC_CLK_10,
             rst_l => KEY(0),
             tx => TX,
             rx => RX,
