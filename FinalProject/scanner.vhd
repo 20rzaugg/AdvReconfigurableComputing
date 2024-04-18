@@ -93,11 +93,14 @@ architecture behavioral of scanner is
     signal input_buffer_output : std_logic_vector(64 downto 0);
     signal input_buffer_read : std_logic := '0';
 
+    signal data_out_sig : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal next_data_out_sig : std_logic_vector(DATA_WIDTH-1 downto 0);
 
 begin
 
     input_buffer_data <= neg_flag & total;
     sclr <= not rst_l;
+    data_out <= data_out_sig;
 
     UART_rx_inst : UART_rx
         port map (
@@ -145,12 +148,14 @@ begin
             total <= (others => '0');
             neg_flag <= '0';
             rd_state <= IDLE;
+            data_out_sig <= (others => '0');
         elsif rising_edge(clk) then
             state <= next_state;
             multiplicant <= next_multiplicantx;
             neg_flag <= next_neg_flag;
             total <= next_total;
             rd_state <= next_rd_state;
+            data_out_sig <= next_data_out_sig;
         end if;
     end process;
 
@@ -189,8 +194,9 @@ begin
         end case;
     end process;
 
-    process(rd_state, instr_in, input_buffer_output, input_buffer_empty) begin
+    process(rd_state, instr_in, input_buffer_output, input_buffer_empty, data_out_sig) begin
         input_buffer_read <= '0';
+        next_data_out_sig <= data_out_sig;
         case rd_state is
             when IDLE =>
                 if (op_cmp(opcode(instr_in), GD)) and input_buffer_empty = '0' then
@@ -202,9 +208,9 @@ begin
             when DEQUEUE =>
                 next_rd_state <= IDLE;
                 if is_unsigned(opcode(instr_in)) = '0' and input_buffer_output(64) = '1' then
-                    data_out <= std_logic_vector(signed(not input_buffer_output(63 downto 0)) + 1);
+                    next_data_out_sig <= std_logic_vector(signed(not input_buffer_output(63 downto 0)) + 1);
                 else
-                    data_out <= input_buffer_output(63 downto 0);
+                    next_data_out_sig <= input_buffer_output(63 downto 0);
                 end if;
         end case;
     end process;

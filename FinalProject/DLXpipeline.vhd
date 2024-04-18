@@ -7,6 +7,7 @@ use work.dlxlib.all;
 entity DLXpipeline is
     port (
         clk : in std_logic;
+        clk_50 : in std_logic;
         rst_l : in std_logic;
         tx : out std_logic;
         rx : in std_logic;
@@ -31,16 +32,6 @@ architecture behavioral of DLXpipeline is
 		    c1 : OUT STD_LOGIC  -- 0.1536 MHz
         );
     end component;
-
---    -- 50 MHz input clock
---    component pll2 is
---        port (
---            areset : IN STD_LOGIC  := '0';
---		    inclk0 : IN STD_LOGIC  := '0';
---		    c0 : OUT STD_LOGIC; -- 0.01 MHz
---		    c1 : OUT STD_LOGIC  -- 100.00 MHz
---        );
---    end component;
 
     component dlx_fetch is
         port (
@@ -76,13 +67,15 @@ architecture behavioral of DLXpipeline is
             data_hazard2 : out STD_LOGIC_VECTOR (1 downto 0);
             data_hazard3 : out STD_LOGIC_VECTOR (1 downto 0);
             print_queue_full : in STD_LOGIC;
-            input_buffer_empty : in STD_LOGIC
+            input_buffer_empty : in STD_LOGIC;
+            ex_stall : in std_logic
         );
     end component;
 
     component dlx_execute is
         port (
             clk : in std_logic;
+            clk_50 : in std_logic;
             rst_l : in std_logic;
             execute_pc : in std_logic_vector(ADDR_WIDTH-1 downto 0);
             reg_in1 : in std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -103,7 +96,9 @@ architecture behavioral of DLXpipeline is
             print_data : out std_logic_vector(DATA_WIDTH-1 downto 0);
             stopwatch_start : out std_logic := '0';
             stopwatch_stop : out std_logic := '0';
-            stopwatch_reset : out std_logic := '0'
+            stopwatch_reset : out std_logic := '0';
+            ex_stall : out std_logic := '0';
+            lcm_result : out std_logic_vector(DATA_WIDTH-1 downto 0)
         );
     end component;
 
@@ -116,7 +111,8 @@ architecture behavioral of DLXpipeline is
             instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
             data_mem_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
             instr_out : out std_logic_vector(INSTR_WIDTH-1 downto 0);
-            alu_result_out : out std_logic_vector(DATA_WIDTH-1 downto 0)
+            alu_result_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            lcm_result : in std_logic_vector(DATA_WIDTH-1 downto 0)
         );
     end component;
 
@@ -223,6 +219,9 @@ architecture behavioral of DLXpipeline is
     signal t_stop : std_logic;
     signal t_rst : std_logic;
 
+    signal ex_stall : std_logic;
+    signal lcm_result : std_logic_vector(DATA_WIDTH-1 downto 0);
+
 
 begin
 
@@ -235,14 +234,6 @@ begin
             c0 => tx_clk,
             c1 => rx_clk
         );
-    
---    pll2_inst : pll2
---        port map (
---            areset => areset,
---            inclk0 => clk,
---            c0 => tim_clk,
---            c1 => open
---        );
 
     fetch : dlx_fetch
         port map (
@@ -277,12 +268,14 @@ begin
             data_hazard2 => data_hazard2, --to execute
             data_hazard3 => data_hazard3, --to execute
             print_queue_full => instr_queue_full, --from printer
-            input_buffer_empty => input_buffer_empty --from scanner
+            input_buffer_empty => input_buffer_empty, --from scanner
+            ex_stall => ex_stall
         );
 
     execute : dlx_execute
         port map (
             clk => clk, --from system
+            clk_50 => clk_50, --from system
             rst_l => rst_l, --from system
             execute_pc => execute_pc, --from decode
             reg_in1 => rs1_data, --from decode
@@ -303,7 +296,9 @@ begin
             print_data => print_data_in, --to printer
             stopwatch_start => t_start, --to stopwatch
             stopwatch_stop => t_stop, --to stopwatch
-            stopwatch_reset => t_rst --to stopwatch
+            stopwatch_reset => t_rst, --to stopwatch
+            ex_stall => ex_stall,
+            lcm_result => lcm_result
         );
 
     memory : dlx_memory
@@ -315,7 +310,8 @@ begin
             instr_in => memory_instr, --from execute
             data_mem_out => data_mem_out, --to writeback
             instr_out => writeback_instr, --to writeback
-            alu_result_out => memory_alu_result_out --to writeback
+            alu_result_out => memory_alu_result_out, --to writeback
+            lcm_result => lcm_result
         );
     
     writeback : dlx_writeback

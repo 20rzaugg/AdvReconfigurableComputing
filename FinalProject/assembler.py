@@ -80,7 +80,7 @@ if __name__ == "__main__":
     input_file.seek(0)
     output_file = open(text_output_file_name, "w")
     output_file.write(
-"""DEPTH = 4096; 
+"""DEPTH = 1024; 
 WIDTH = 64; 
 ADDRESS_RADIX = HEX; 
 DATA_RADIX = HEX; 
@@ -174,7 +174,7 @@ BEGIN\n\n""")
     output_file = open(data_output_file_name, "w")
     data_memory_address = 0
     output_file.write(
-"""DEPTH = 4096; 
+"""DEPTH = 1024; 
 WIDTH = 64; 
 ADDRESS_RADIX = HEX; 
 DATA_RADIX = HEX; 

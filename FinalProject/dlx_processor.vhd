@@ -26,6 +26,7 @@ architecture behavioral of dlx_processor is
     component DLXpipeline is
         port (
             clk : in std_logic;
+            clk_50 : in std_logic;
             rst_l : in std_logic;
             tx : out std_logic;
             rx : in std_logic;
@@ -42,8 +43,8 @@ begin
 
     pipeline : DLXpipeline
         port map (
-            --clk => MAX10_CLK1_50,
             clk => ADC_CLK_10,
+            clk_50 => MAX10_CLK1_50,
             rst_l => KEY(0),
             tx => TX,
             rx => RX,

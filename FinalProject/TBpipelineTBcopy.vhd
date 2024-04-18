@@ -12,6 +12,7 @@ architecture testbench of TBpipelineTBcopy is
     component DLXpipelineTBcopy is
         port (
             clk : in std_logic;
+            clk_50 : in std_logic;
             rst_l : in std_logic;
             tx : out std_logic;
             LEDR : out std_logic_vector(9 downto 0);
@@ -27,6 +28,7 @@ architecture testbench of TBpipelineTBcopy is
     end component;
 
     signal clk : std_logic := '0';
+    signal clk_50 : std_logic := '0';
     signal rst_l : std_logic := '1';
     signal index : integer := 0;
     signal next_index : integer := 0;
@@ -45,6 +47,7 @@ begin
     DUT : DLXpipelineTBcopy
         port map (
             clk => clk,
+            clk_50 => clk_50,
             rst_l => rst_l,
             tx => tx,
             LEDR => LEDR,
@@ -62,6 +65,12 @@ begin
     begin
         wait for 10 ns;
         clk <= not clk;
+    end process;
+
+    process
+    begin
+        wait for 2 ns;
+        clk_50 <= not clk_50;
     end process;
 
     process (clk)

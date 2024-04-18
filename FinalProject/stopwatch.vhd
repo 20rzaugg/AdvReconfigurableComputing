@@ -38,10 +38,10 @@ begin
 
     HEX0 <= sev_seg(to_integer(tenms));
     HEX1 <= sev_seg(to_integer(hunms));
-    HEX2 <= sev_seg(to_integer(onesec)) and X"7F";
-    HEX3 <= sev_seg(to_integer(tensec));
-    HEX4 <= sev_seg(to_integer(onemin)) and X"7F";
-    HEX5 <= sev_seg(to_integer(tenmin));
+    HEX2 <= sev_seg(to_integer(onesec));
+    HEX3 <= sev_seg(to_integer(tensec)) and X"7F";
+    HEX4 <= sev_seg(to_integer(onemin));
+    HEX5 <= sev_seg(to_integer(tenmin)) and X"7F";
 
     process(clk, rst_l) begin
         if rst_l = '0' or rst = '1' then
@@ -66,7 +66,7 @@ begin
             onemin <= onemin;
             tenmin <= tenmin;
             if go = '1' then
-                if counter >= 99999 then --set up for 10 Mhz clock
+                if counter >= 9999 then --set up for 10 Mhz clock
                     counter <= 0;
                     if tenms = X"09" then
                         tenms <= (others => '0');
@@ -74,9 +74,9 @@ begin
                             hunms <= (others => '0');
                             if onesec = X"09" then
                                 onesec <= (others => '0');
-                                if tensec = X"05" then
+                                if tensec = X"09" then
                                     tensec <= (others => '0');
-                                    if onemin = X"09" then
+                                    if onemin = X"06" then
                                         onemin <= (others => '0');
                                         tenmin <= tenmin + 1;
                                     else
