@@ -26,6 +26,7 @@ architecture behavioral of stopwatch is
     signal onesec : unsigned(7 downto 0) := X"00";
     signal hunms : unsigned(7 downto 0) := X"00";
     signal tenms : unsigned(7 downto 0) := X"00";
+    signal onems : unsigned(7 downto 0) := X"00";
 
     signal counter : integer range 0 to 100000  := 0;
 
@@ -36,12 +37,12 @@ architecture behavioral of stopwatch is
 
 begin
 
-    HEX0 <= sev_seg(to_integer(tenms));
-    HEX1 <= sev_seg(to_integer(hunms));
-    HEX2 <= sev_seg(to_integer(onesec));
-    HEX3 <= sev_seg(to_integer(tensec)) and X"7F";
-    HEX4 <= sev_seg(to_integer(onemin));
-    HEX5 <= sev_seg(to_integer(tenmin)) and X"7F";
+    HEX0 <= (sev_seg(to_integer(onems))) when tenmin = X"00" else (sev_seg(to_integer(tenms)));
+    HEX1 <= (sev_seg(to_integer(tenms))) when tenmin = X"00" else (sev_seg(to_integer(hunms)));
+    HEX2 <= (sev_seg(to_integer(hunms))) when tenmin = X"00" else (sev_seg(to_integer(onesec)) and X"7F");
+    HEX3 <= (sev_seg(to_integer(onesec)) and X"7F") when tenmin = X"00" else (sev_seg(to_integer(tensec)));
+    HEX4 <= (sev_seg(to_integer(tensec))) when tenmin = X"00" else (sev_seg(to_integer(onemin)) and X"7F");
+    HEX5 <= (sev_seg(to_integer(onemin)) and X"7F") when tenmin < X"01" else (sev_seg(to_integer(tenmin)));
 
     process(clk, rst_l) begin
         if rst_l = '0' or rst = '1' then
@@ -51,6 +52,7 @@ begin
             onesec <= X"00";
             hunms <= X"00";
             tenms <= X"00";
+            onems <= X"00";
             counter <= 0;
             go <= '0';
         elsif rising_edge(clk) then
@@ -68,31 +70,36 @@ begin
             if go = '1' then
                 if counter >= 9999 then --set up for 10 Mhz clock
                     counter <= 0;
-                    if tenms = X"09" then
-                        tenms <= (others => '0');
-                        if hunms = X"09" then
-                            hunms <= (others => '0');
-                            if onesec = X"09" then
-                                onesec <= (others => '0');
-                                if tensec = X"09" then
-                                    tensec <= (others => '0');
-                                    if onemin = X"06" then
-                                        onemin <= (others => '0');
-                                        tenmin <= tenmin + 1;
+                    if onems = X"09" then
+                        onems <= (others => '0');
+                        if tenms = X"09" then
+                            tenms <= (others => '0');
+                            if hunms = X"09" then
+                                hunms <= (others => '0');
+                                if onesec = X"09" then
+                                    onesec <= (others => '0');
+                                    if tensec = X"05" then
+                                        tensec <= (others => '0');
+                                        if onemin = X"09" then
+                                            onemin <= (others => '0');
+                                            tenmin <= tenmin + 1;
+                                        else
+                                            onemin <= onemin + 1;
+                                        end if;
                                     else
-                                        onemin <= onemin + 1;
+                                        tensec <= tensec + 1;
                                     end if;
                                 else
-                                    tensec <= tensec + 1;
+                                    onesec <= onesec + 1;
                                 end if;
                             else
-                                onesec <= onesec + 1;
+                                hunms <= hunms + 1;
                             end if;
                         else
-                            hunms <= hunms + 1;
+                            tenms <= tenms + 1;
                         end if;
                     else
-                        tenms <= tenms + 1;
+                        onems <= onems + 1;
                     end if;
                 else
                     counter <= counter + 1;
