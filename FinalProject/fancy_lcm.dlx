@@ -1,0 +1,121 @@
+.data
+    inputs 12 0 0 0 0 0 0 0 0 0 0 0 0
+    intermediates 6 0 0 0 0 0 0
+    finals 3 0 0 0
+    result 1 0
+.const
+    s1 83 "\n\rWelcome to the DLX LCM Calculator!\n\rPlease enter 12 numbers separated by spaces: "
+    sx 2 "\n\r"
+    s2 23 "\n\rThe computed LCM is: "
+.text
+    ; print string s1
+    ADDI R15, R0, s1
+    JAL printstring
+    ADDI R1, R0, 0
+inputloop
+    ; End loop if 12 inputs have been read
+    SEQI R10, R1, 12
+    BNEZ R10, inputloopdone
+    ; Read input
+    GDU R3
+    ; Place pointer at the top of the stack of data
+    ADD R2, R1, R0
+sortloop
+    ; If there are no prev inputs, or we've reached 0, end the loop
+    BEQZ R2, sortloopdone
+    ; Load the input below the current pointer
+    SUBI R4, R2, 1
+    LW R5, inputs(R4)
+    ; If the input is less than the current pointer, swap them
+    SGTU R10, R5, R3
+    BEQZ R10, sortloopdone
+    SW inputs(R2), R5 
+    SUBI R2, R2, 1
+    J sortloop
+sortloopdone
+    ; formally place the new value in memory
+    SW inputs(R2), R3 
+    ADDI R1, R1, 1
+    J inputloop
+inputloopdone
+
+    TCLR
+    TSRT
+    ADDI R12, R0, 0
+    ADDI R13, R0, 11
+intermediatesloop
+    SEQI R10, R12, 6
+    BNEZ R10, intermediatesloopdone
+    LW R1, inputs(R12)
+    LW R2, inputs(R13)
+    LCM R3, R1, R2
+    ADD R4, R12, R0
+intermediatessortloop
+    BEQZ R4 intermediatessortloopdone
+    SUBI R5, R4, 1
+    LW R6, intermediates(R5)
+    SGTU R10, R6, R3
+    BEQZ R10, intermediatessortloopdone
+    SW intermediates(R4), R6
+    SUBI R4, R4, 1
+    J intermediatessortloop
+intermediatessortloopdone
+    SW intermediates(R4), R3
+    ADDI R12, R12 1
+    SUBI R13, R13, 1
+    J intermediatesloop
+intermediatesloopdone
+    ADDI R12, R0, 0
+    ADDI R13, R0, 5
+finalsloop
+    SEQI R10, R12, 3
+    BNEZ R10, finalsloopdone
+    LW R1, intermediates(R12)
+    LW R2, intermediates(R13)
+    LCM R3, R1, R2
+    ADD R4, R12, R0
+finalssortloop
+    BEQZ R4 finalssortloopdone
+    SUBI R5, R4, 1
+    LW R6, finals(R5)
+    SGTU R10, R6, R3
+    BEQZ R10, finalssortloopdone
+    SW finals(R4), R6
+    SUBI R4, R4, 1
+    J finalssortloop
+finalssortloopdone
+    SW finals(R4), R3
+    ADDI R12, R12, 1
+    SUBI R13, R13, 1
+    J finalsloop
+finalsloopdone
+    ADDI R12, R0, 1
+    LW R1, finals(R0)
+    LW R2, finals(R12)
+    LCM R3, R1, R2
+    ADDI R12, R12 1
+    LW R2, finals(R12)
+    LCM R1, R2, R3
+
+    J exit
+
+; assumes input pointer is R15 and string is '\0' terminated 
+printstring
+    ADDI R17, R0, 0
+printloop
+	LWP R16, R15(R17)
+	BEQZ R16 doneprinting
+	PCH R16
+	ADDI R17, R17, 1
+	J printloop
+doneprinting
+	JR R63
+
+exit
+    SW result(R0), R1
+    ADDI R15, R0, s2
+    JAL printstring
+    PDU R1
+    TSTP
+done
+    J done

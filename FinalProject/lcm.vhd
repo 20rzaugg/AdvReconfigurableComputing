@@ -88,16 +88,24 @@ process(state, v1_locked, v2_locked, v1_accumulator, v2_accumulator, vout_sig, v
                     next_vout_sig <= (others => '1');
                     next_state <= S_DONE;
                 else
-                    next_v1_accumulator <= v1_accumulator + v1_locked;
                     next_state <= S_ADD;
+                    if v1_accumulator + v1_locked < v2_accumulator then
+                        next_v1_accumulator <= v1_accumulator + v1_locked + v1_locked;
+                    else
+                        next_v1_accumulator <= v1_accumulator + v1_locked;
+                    end if;
                 end if;
             else
                 if v2_accumulator + v2_locked < v2_accumulator then 
                     next_vout_sig <= (others => '1');
                     next_state <= S_DONE;
                 else
-                    next_v2_accumulator <= v2_accumulator + v2_locked;
                     next_state <= S_ADD;
+                    if v2_accumulator + v2_locked < v1_accumulator then
+                        next_v2_accumulator <= v2_accumulator + v2_locked + v2_locked;
+                    else
+                        next_v2_accumulator <= v2_accumulator + v2_locked;
+                    end if;
                 end if;
             end if;
         when S_DONE =>

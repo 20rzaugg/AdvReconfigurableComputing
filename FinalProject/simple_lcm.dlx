@@ -102,6 +102,17 @@ inputloopdone
     NOOP
 
     ; -- final 2
+    SGTU R13, R1, R2
+    BNEZ R13, aGTb
+    SGTU R13, R2, R3
+    BNEZ R13, doAC
+    J doAB
+aGTb
+    SGTU R13, R1, R3
+    BNEZ R13, doBC
+    J doAB
+
+doAB
     LCM R1, R1, R2
     NOOP
     NOOP
@@ -110,8 +121,30 @@ inputloopdone
     NOOP
     NOOP
 
-    SW result(R0), R3
     J exit
+
+doAC
+    LCM R1, R1, R3
+    NOOP
+    NOOP
+
+    LCM R3, R1, R2
+    NOOP
+    NOOP
+
+    J exit
+
+doBC
+    LCM R2, R2, R3
+    NOOP
+    NOOP
+
+    LCM R3, R1, R2
+    NOOP
+    NOOP
+
+    J exit
+
 
 ; assumes input pointer is R15 and string is '\0' terminated 
 printstring
@@ -126,6 +159,7 @@ doneprinting
 	JR R63
 
 exit
+    SW result(R0), R3
     ADDI R15, R0, s2
     JAL printstring
     PDU R3
