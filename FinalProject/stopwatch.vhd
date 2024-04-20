@@ -20,6 +20,7 @@ end stopwatch;
 
 architecture behavioral of stopwatch is
 
+    signal onehour : unsigned(7 downto 0) := X"00";
     signal tenmin : unsigned(7 downto 0) := X"00";
     signal onemin : unsigned(7 downto 0) := X"00";
     signal tensec : unsigned(7 downto 0) := X"00";
@@ -37,15 +38,34 @@ architecture behavioral of stopwatch is
 
 begin
 
-    HEX0 <= (sev_seg(to_integer(onems))) when tenmin = X"00" else (sev_seg(to_integer(tenms)));
-    HEX1 <= (sev_seg(to_integer(tenms))) when tenmin = X"00" else (sev_seg(to_integer(hunms)));
-    HEX2 <= (sev_seg(to_integer(hunms))) when tenmin = X"00" else (sev_seg(to_integer(onesec)) and X"7F");
-    HEX3 <= (sev_seg(to_integer(onesec)) and X"7F") when tenmin = X"00" else (sev_seg(to_integer(tensec)));
-    HEX4 <= (sev_seg(to_integer(tensec))) when tenmin = X"00" else (sev_seg(to_integer(onemin)) and X"7F");
-    HEX5 <= (sev_seg(to_integer(onemin)) and X"7F") when tenmin < X"01" else (sev_seg(to_integer(tenmin)));
+    process(onehour, tenmin, onemin, tensec, onesec, hunms, tenms, onems) begin
+        if onehour = X"00" and tenmin = X"00" then
+            HEX0 <= (sev_seg(to_integer(onems))); 
+            HEX1 <= (sev_seg(to_integer(tenms))); 
+            HEX2 <= (sev_seg(to_integer(hunms)));
+            HEX3 <= (sev_seg(to_integer(onesec)) and X"7F");
+            HEX4 <= (sev_seg(to_integer(tensec)));
+            HEX5 <= (sev_seg(to_integer(onemin)) and X"7F");
+        elsif onehour = X"00" then
+            HEX0 <= (sev_seg(to_integer(tenms)));
+            HEX1 <= (sev_seg(to_integer(hunms)));
+            HEX2 <= (sev_seg(to_integer(onesec)) and X"7F");
+            HEX3 <= (sev_seg(to_integer(tensec)));
+            HEX4 <= (sev_seg(to_integer(onemin)) and X"7F");
+            HEX5 <= (sev_seg(to_integer(tenmin)));
+        else
+            HEX0 <= (sev_seg(to_integer(hunms)));
+            HEX1 <= (sev_seg(to_integer(onesec)) and X"7F");
+            HEX2 <= (sev_seg(to_integer(tensec)));
+            HEX3 <= (sev_seg(to_integer(onemin)) and X"7F");
+            HEX4 <= (sev_seg(to_integer(tenmin)));
+            HEX5 <= (sev_seg(to_integer(onehour)) and X"7F");
+        end if;
+    end process;
 
     process(clk, rst_l) begin
         if rst_l = '0' or rst = '1' then
+            onehour <= X"00";
             tenmin <= X"00";
             onemin <= X"00";
             tensec <= X"00";
@@ -61,6 +81,7 @@ begin
             elsif t_stop = '1' then
                 go <= '0';
             end if;
+            onehour <= onehour;
             tenms <= tenms;
 			hunms <= hunms;
             onesec <= onesec;
@@ -82,7 +103,16 @@ begin
                                         tensec <= (others => '0');
                                         if onemin = X"09" then
                                             onemin <= (others => '0');
-                                            tenmin <= tenmin + 1;
+                                            if tenmin = X"05" then
+                                                tenmin <= (others => '0');
+                                                if onehour = X"09" then
+                                                    onehour <= (others => '0');
+                                                else
+                                                    onehour <= onehour + 1;
+                                                end if;
+                                            else
+                                                tenmin <= tenmin + 1;
+                                            end if;
                                         else
                                             onemin <= onemin + 1;
                                         end if;

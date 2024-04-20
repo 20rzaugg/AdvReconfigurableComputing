@@ -89,8 +89,22 @@ process(state, v1_locked, v2_locked, v1_accumulator, v2_accumulator, vout_sig, v
                     next_state <= S_DONE;
                 else
                     next_state <= S_ADD;
-                    if v1_accumulator + v1_locked < v2_accumulator then
-                        next_v1_accumulator <= v1_accumulator + v1_locked + v1_locked;
+                    if v1_accumulator + shift_left(v1_locked, 8) < v2_accumulator then
+                        next_v1_accumulator <= v1_accumulator + shift_left(v1_locked, 8) + v1_locked;
+                    elsif v1_accumulator + shift_left(v1_locked, 7) < v2_accumulator then
+                        next_v1_accumulator <= v1_accumulator + shift_left(v1_locked, 7) + v1_locked;
+                    elsif v1_accumulator + shift_left(v1_locked, 6) < v2_accumulator then
+                        next_v1_accumulator <= v1_accumulator + shift_left(v1_locked, 6) + v1_locked;
+                    elsif v1_accumulator + shift_left(v1_locked, 5) < v2_accumulator then
+                        next_v1_accumulator <= v1_accumulator + shift_left(v1_locked, 5) + v1_locked;
+                    elsif v1_accumulator + shift_left(v1_locked, 4) < v2_accumulator then
+                        next_v1_accumulator <= v1_accumulator + shift_left(v1_locked, 4) + v1_locked;
+                    elsif v1_accumulator + shift_left(v1_locked, 3) < v2_accumulator then
+                        next_v1_accumulator <= v1_accumulator + shift_left(v1_locked, 3) + v1_locked;
+                    elsif v1_accumulator + shift_left(v1_locked, 2) < v2_accumulator then
+                        next_v1_accumulator <= v1_accumulator + shift_left(v1_locked, 2) + v1_locked;
+                    elsif v1_accumulator + shift_left(v1_locked, 1) < v2_accumulator then
+                        next_v1_accumulator <= v1_accumulator + shift_left(v1_locked, 1) + v1_locked;
                     else
                         next_v1_accumulator <= v1_accumulator + v1_locked;
                     end if;
@@ -101,8 +115,22 @@ process(state, v1_locked, v2_locked, v1_accumulator, v2_accumulator, vout_sig, v
                     next_state <= S_DONE;
                 else
                     next_state <= S_ADD;
-                    if v2_accumulator + v2_locked < v1_accumulator then
-                        next_v2_accumulator <= v2_accumulator + v2_locked + v2_locked;
+                    if v2_accumulator + shift_left(v2_locked, 8) < v1_accumulator then
+                        next_v2_accumulator <= v2_accumulator + shift_left(v2_locked, 8) + v2_locked;
+                    elsif v2_accumulator + shift_left(v2_locked, 7) < v1_accumulator then
+                        next_v2_accumulator <= v2_accumulator + shift_left(v2_locked, 7) + v2_locked;
+                    elsif v2_accumulator + shift_left(v2_locked, 6) < v1_accumulator then
+                        next_v2_accumulator <= v2_accumulator + shift_left(v2_locked, 6) + v2_locked;
+                    elsif v2_accumulator + shift_left(v2_locked, 5) < v1_accumulator then
+                        next_v2_accumulator <= v2_accumulator + shift_left(v2_locked, 5) + v2_locked;
+                    elsif v2_accumulator + shift_left(v2_locked, 4) < v1_accumulator then
+                        next_v2_accumulator <= v2_accumulator + shift_left(v2_locked, 4) + v2_locked;
+                    elsif v2_accumulator + shift_left(v2_locked, 3) < v1_accumulator then
+                        next_v2_accumulator <= v2_accumulator + shift_left(v2_locked, 3) + v2_locked;
+                    elsif v2_accumulator + shift_left(v2_locked, 2) < v1_accumulator then
+                        next_v2_accumulator <= v2_accumulator + shift_left(v2_locked, 2) + v2_locked;
+                    elsif v2_accumulator + shift_left(v2_locked, 1) < v1_accumulator then
+                        next_v2_accumulator <= v2_accumulator + shift_left(v2_locked, 1) + v2_locked;
                     else
                         next_v2_accumulator <= v2_accumulator + v2_locked;
                     end if;
