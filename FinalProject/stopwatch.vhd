@@ -28,6 +28,9 @@ architecture behavioral of stopwatch is
     signal hunms : unsigned(7 downto 0) := X"00";
     signal tenms : unsigned(7 downto 0) := X"00";
     signal onems : unsigned(7 downto 0) := X"00";
+    signal hunus : unsigned(7 downto 0) := X"00";
+    signal tenus : unsigned(7 downto 0) := X"00";
+    signal oneus : unsigned(7 downto 0) := X"00";
 
     signal counter : integer range 0 to 100000  := 0;
 
@@ -38,8 +41,29 @@ architecture behavioral of stopwatch is
 
 begin
 
-    process(onehour, tenmin, onemin, tensec, onesec, hunms, tenms, onems) begin
-        if onehour = X"00" and tenmin = X"00" then
+    process(onehour, tenmin, onemin, tensec, onesec, hunms, tenms, onems, hunus, tenus, oneus) begin
+        if onehour = X"00" and tenmin = X"00" and onemin = X"00" and tensec = X"00" and onesec = X"00" then
+            HEX0 <= (sev_seg(to_integer(oneus))); 
+            HEX1 <= (sev_seg(to_integer(tenus))); 
+            HEX2 <= (sev_seg(to_integer(hunus)));
+            HEX3 <= (sev_seg(to_integer(onems))); 
+            HEX4 <= (sev_seg(to_integer(tenms))); 
+            HEX5 <= (sev_seg(to_integer(hunms)));
+        elsif onehour = X"00" and tenmin = X"00" and onemin = X"00" and tensec = X"00" then
+            HEX0 <= (sev_seg(to_integer(tenus))); 
+            HEX1 <= (sev_seg(to_integer(hunus))); 
+            HEX2 <= (sev_seg(to_integer(onems)));
+            HEX3 <= (sev_seg(to_integer(tenms))); 
+            HEX4 <= (sev_seg(to_integer(hunms))); 
+            HEX5 <= (sev_seg(to_integer(onesec)) and X"7F");
+        elsif onehour = X"00" and tenmin = X"00" and onemin = X"00" then
+            HEX0 <= (sev_seg(to_integer(hunus))); 
+            HEX1 <= (sev_seg(to_integer(onems))); 
+            HEX2 <= (sev_seg(to_integer(tenms)));
+            HEX3 <= (sev_seg(to_integer(hunms))); 
+            HEX4 <= (sev_seg(to_integer(onesec)) and X"7F"); 
+            HEX5 <= (sev_seg(to_integer(tensec)));
+        elsif onehour = X"00" and tenmin = X"00" then
             HEX0 <= (sev_seg(to_integer(onems))); 
             HEX1 <= (sev_seg(to_integer(tenms))); 
             HEX2 <= (sev_seg(to_integer(hunms)));
@@ -73,6 +97,9 @@ begin
             hunms <= X"00";
             tenms <= X"00";
             onems <= X"00";
+            hunus <= X"00";
+            tenus <= X"00";
+            oneus <= X"00";
             counter <= 0;
             go <= '0';
         elsif rising_edge(clk) then
@@ -89,52 +116,67 @@ begin
             onemin <= onemin;
             tenmin <= tenmin;
             if go = '1' then
-                if counter >= 9999 then --set up for 10 Mhz clock
+                if counter >= 9 then --set up for 10 Mhz clock
                     counter <= 0;
-                    if onems = X"09" then
-                        onems <= (others => '0');
-                        if tenms = X"09" then
-                            tenms <= (others => '0');
-                            if hunms = X"09" then
-                                hunms <= (others => '0');
-                                if onesec = X"09" then
-                                    onesec <= (others => '0');
-                                    if tensec = X"05" then
-                                        tensec <= (others => '0');
-                                        if onemin = X"09" then
-                                            onemin <= (others => '0');
-                                            if tenmin = X"05" then
-                                                tenmin <= (others => '0');
-                                                if onehour = X"09" then
-                                                    onehour <= (others => '0');
+                    if oneus = X"09" then
+                        oneus <= (others => '0');
+                        if tenus = X"09" then
+                            tenus <= (others => '0');
+                            if hunus = X"09" then
+                                hunus <= (others => '0');
+                                if onems = X"09" then
+                                    onems <= (others => '0');
+                                    if tenms = X"09" then
+                                        tenms <= (others => '0');
+                                        if hunms = X"09" then
+                                            hunms <= (others => '0');
+                                            if onesec = X"09" then
+                                                onesec <= (others => '0');
+                                                if tensec = X"05" then
+                                                    tensec <= (others => '0');
+                                                    if onemin = X"09" then
+                                                        onemin <= (others => '0');
+                                                        if tenmin = X"05" then
+                                                            tenmin <= (others => '0');
+                                                            if onehour = X"09" then
+                                                                onehour <= (others => '0');
+                                                            else
+                                                                onehour <= onehour + 1;
+                                                            end if;
+                                                        else
+                                                            tenmin <= tenmin + 1;
+                                                        end if;
+                                                    else
+                                                        onemin <= onemin + 1;
+                                                    end if;
                                                 else
-                                                    onehour <= onehour + 1;
+                                                    tensec <= tensec + 1;
                                                 end if;
                                             else
-                                                tenmin <= tenmin + 1;
+                                                onesec <= onesec + 1;
                                             end if;
                                         else
-                                            onemin <= onemin + 1;
+                                            hunms <= hunms + 1;
                                         end if;
                                     else
-                                        tensec <= tensec + 1;
+                                        tenms <= tenms + 1;
                                     end if;
                                 else
-                                    onesec <= onesec + 1;
+                                    onems <= onems + 1;
                                 end if;
                             else
-                                hunms <= hunms + 1;
+                                hunus <= hunus + 1;
                             end if;
                         else
-                            tenms <= tenms + 1;
+                            tenus <= tenus + 1;
                         end if;
                     else
-                        onems <= onems + 1;
+                        oneus <= oneus + 1;
                     end if;
                 else
                     counter <= counter + 1;
                 end if;
-            end if;
+            end if;         
         end if;
     end process;
 

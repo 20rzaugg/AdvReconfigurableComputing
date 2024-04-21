@@ -47,7 +47,7 @@ architecture behavioral of lcm_accelerator is
         );
     end component;
 
-    component lcm is
+    component lcm_gcd is
         port(
             clk : in std_logic;
             rst_l : in std_logic;
@@ -112,7 +112,7 @@ begin
             wrfull => out_queue_full
         );
 
-    lcm_accelerator : lcm
+    lcm_accelerator : lcm_gcd
         port map (
             clk => clk_50,
             rst_l => rst_l,
