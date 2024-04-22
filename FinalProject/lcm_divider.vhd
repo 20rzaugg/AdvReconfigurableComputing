@@ -43,6 +43,7 @@ USE lpm.all;
 ENTITY lcm_divider IS
 	PORT
 	(
+		clock		: IN STD_LOGIC ;
 		denom		: IN STD_LOGIC_VECTOR (63 DOWNTO 0);
 		numer		: IN STD_LOGIC_VECTOR (63 DOWNTO 0);
 		quotient		: OUT STD_LOGIC_VECTOR (63 DOWNTO 0);
@@ -63,11 +64,13 @@ ARCHITECTURE SYN OF lcm_divider IS
 		lpm_drepresentation		: STRING;
 		lpm_hint		: STRING;
 		lpm_nrepresentation		: STRING;
+		lpm_pipeline		: NATURAL;
 		lpm_type		: STRING;
 		lpm_widthd		: NATURAL;
 		lpm_widthn		: NATURAL
 	);
 	PORT (
+			clock	: IN STD_LOGIC ;
 			denom	: IN STD_LOGIC_VECTOR (63 DOWNTO 0);
 			numer	: IN STD_LOGIC_VECTOR (63 DOWNTO 0);
 			quotient	: OUT STD_LOGIC_VECTOR (63 DOWNTO 0);
@@ -84,11 +87,13 @@ BEGIN
 		lpm_drepresentation => "UNSIGNED",
 		lpm_hint => "LPM_REMAINDERPOSITIVE=TRUE",
 		lpm_nrepresentation => "UNSIGNED",
+		lpm_pipeline => 5,
 		lpm_type => "LPM_DIVIDE",
 		lpm_widthd => 64,
 		lpm_widthn => 64
 	)
 	PORT MAP (
+		clock => clock,
 		denom => denom,
 		numer => numer,
 		quotient => sub_wire0,
@@ -106,20 +111,23 @@ END SYN;
 -- Retrieval info: PRIVATE: PRIVATE_LPM_REMAINDERPOSITIVE STRING "TRUE"
 -- Retrieval info: PRIVATE: PRIVATE_MAXIMIZE_SPEED NUMERIC "-1"
 -- Retrieval info: PRIVATE: SYNTH_WRAPPER_GEN_POSTFIX STRING "0"
--- Retrieval info: PRIVATE: USING_PIPELINE NUMERIC "0"
+-- Retrieval info: PRIVATE: USING_PIPELINE NUMERIC "1"
 -- Retrieval info: PRIVATE: VERSION_NUMBER NUMERIC "2"
 -- Retrieval info: PRIVATE: new_diagram STRING "1"
 -- Retrieval info: LIBRARY: lpm lpm.lpm_components.all
 -- Retrieval info: CONSTANT: LPM_DREPRESENTATION STRING "UNSIGNED"
 -- Retrieval info: CONSTANT: LPM_HINT STRING "LPM_REMAINDERPOSITIVE=TRUE"
 -- Retrieval info: CONSTANT: LPM_NREPRESENTATION STRING "UNSIGNED"
+-- Retrieval info: CONSTANT: LPM_PIPELINE NUMERIC "5"
 -- Retrieval info: CONSTANT: LPM_TYPE STRING "LPM_DIVIDE"
 -- Retrieval info: CONSTANT: LPM_WIDTHD NUMERIC "64"
 -- Retrieval info: CONSTANT: LPM_WIDTHN NUMERIC "64"
+-- Retrieval info: USED_PORT: clock 0 0 0 0 INPUT NODEFVAL "clock"
 -- Retrieval info: USED_PORT: denom 0 0 64 0 INPUT NODEFVAL "denom[63..0]"
 -- Retrieval info: USED_PORT: numer 0 0 64 0 INPUT NODEFVAL "numer[63..0]"
 -- Retrieval info: USED_PORT: quotient 0 0 64 0 OUTPUT NODEFVAL "quotient[63..0]"
 -- Retrieval info: USED_PORT: remain 0 0 64 0 OUTPUT NODEFVAL "remain[63..0]"
+-- Retrieval info: CONNECT: @clock 0 0 0 0 clock 0 0 0 0
 -- Retrieval info: CONNECT: @denom 0 0 64 0 denom 0 0 64 0
 -- Retrieval info: CONNECT: @numer 0 0 64 0 numer 0 0 64 0
 -- Retrieval info: CONNECT: quotient 0 0 64 0 @quotient 0 0 64 0

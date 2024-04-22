@@ -1,0 +1,81 @@
+.data
+.const
+    s1 83 "\n\rWelcome to the DLX LCM Calculator!\n\rPlease enter 12 numbers separated by spaces: "
+    s2 8 "\n\rLCM = "
+.text
+    ; print string s1
+    ADDI R15, R0, s1
+    JAL printstring
+    
+    ; get input
+    GDU R1
+    NOOP
+    GDU R2
+    NOOP
+    GDU R3
+    NOOP
+    GDU R4
+    NOOP
+    GDU R5
+    NOOP
+    GDU R6
+    NOOP
+    GDU R7
+    NOOP
+    GDU R8
+    NOOP
+    GDU R9
+    NOOP
+    GDU R10
+    NOOP
+    GDU R11
+    NOOP
+    GDU R12
+
+    TCLR
+    TSRT
+
+    ; -- initial
+    LCM R1, R1, R12
+    LCM R2, R2, R11
+    LCM R3, R3, R10
+    LCM R4, R4, R9
+    LCM R5, R5, R8
+    LCM R6, R6, R7
+    NOOP
+    NOOP
+
+    ; -- intermediates
+    LCM R1, R1, R6
+    LCM R2, R2, R5
+    LCM R3, R3, R4
+    NOOP
+    ; -- final 2
+    LCM R1, R1, R2
+    NOOP
+    NOOP
+    LCM R3, R1, R3
+    NOOP
+    NOOP
+
+    J exit
+
+; assumes input pointer is R15 and string is '\0' terminated 
+printstring
+    ADDI R17, R0, 0
+printloop
+	LWP R16, R15(R17)
+	BEQZ R16 doneprinting
+	PCH R16
+	ADDI R17, R17, 1
+	J printloop
+doneprinting
+	JR R63
+
+exit
+    ADDI R15, R0, s2
+    JAL printstring
+    PDU R3
+    TSTP
+done
+    J done

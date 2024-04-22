@@ -3,7 +3,7 @@
     result 1 0
 .const
     s1 83 "\n\rWelcome to the DLX LCM Calculator!\n\rPlease enter 12 numbers separated by spaces: "
-    s2 23 "\n\rThe computed LCM is: "
+    s2 8 "\n\rLCM = "
 .text
     ; print string s1
     ADDI R15, R0, s1
@@ -66,22 +66,17 @@ inputloopdone
     ; -- initial
     LCM R1, R1, R12
     NOOP
-    NOOP
 
     LCM R2, R2, R11
-    NOOP
     NOOP
 
     LCM R3, R3, R10
     NOOP
-    NOOP
 
     LCM R4, R4, R9
     NOOP
-    NOOP
 
     LCM R5, R5, R8
-    NOOP
     NOOP
 
     LCM R6, R6, R7
@@ -91,28 +86,14 @@ inputloopdone
     ; -- intermediates
     LCM R1, R1, R6
     NOOP
-    NOOP
 
     LCM R2, R2, R5
-    NOOP
     NOOP
 
     LCM R3, R3, R4
     NOOP
-    NOOP
 
     ; -- final 2
-    SGTU R13, R1, R2
-    BNEZ R13, aGTb
-    SGTU R13, R2, R3
-    BNEZ R13, doAC
-    J doAB
-aGTb
-    SGTU R13, R1, R3
-    BNEZ R13, doBC
-    J doAB
-
-doAB
     LCM R1, R1, R2
     NOOP
     NOOP
@@ -122,29 +103,6 @@ doAB
     NOOP
 
     J exit
-
-doAC
-    LCM R1, R1, R3
-    NOOP
-    NOOP
-
-    LCM R3, R1, R2
-    NOOP
-    NOOP
-
-    J exit
-
-doBC
-    LCM R2, R2, R3
-    NOOP
-    NOOP
-
-    LCM R3, R1, R2
-    NOOP
-    NOOP
-
-    J exit
-
 
 ; assumes input pointer is R15 and string is '\0' terminated 
 printstring
@@ -159,7 +117,6 @@ doneprinting
 	JR R63
 
 exit
-    SW result(R0), R3
     ADDI R15, R0, s2
     JAL printstring
     PDU R3

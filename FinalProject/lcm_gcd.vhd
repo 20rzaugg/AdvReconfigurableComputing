@@ -21,6 +21,7 @@ architecture Behavioral of LCM_GCD is
 
     component lcm_multiplier is
         port (
+            clock : IN std_logic;
 		    dataa : IN std_logic_vector (63 downto 0);
 		    datab : IN std_logic_vector (63 downto 0);
 		    result : OUT std_logic_vector (127 downto 0)
@@ -29,6 +30,7 @@ architecture Behavioral of LCM_GCD is
 
     component lcm_divider is
         port (
+            clock : in std_logic;
             denom : in std_logic_vector(63 downto 0);
             numer : in std_logic_vector(63 downto 0);
             quotient : out std_logic_vector(63 downto 0);
@@ -36,7 +38,7 @@ architecture Behavioral of LCM_GCD is
         );
     end component;
 
-    type stateType is (S_IDLE, S_READ, S_EVEN, S_GCD, S_DIVIDE, S_DIVIDE2, S_MULTIPLY, S_MULTIPLY2, S_DONE);
+    type stateType is (S_IDLE, S_READ, S_EVEN, S_GCD, S_DIVIDE, S_DIVIDE2, S_DIVIDE3, S_DIVIDE4, S_DIVIDE5, S_DIVIDE6, S_MULTIPLY, S_MULTIPLY2, S_MULTIPLY3, S_DONE);
     signal state : stateType := S_IDLE;
     signal next_state : stateType := S_IDLE;
     signal v1_locked : unsigned(DATA_WIDTH-1 downto 0);
@@ -70,6 +72,7 @@ architecture Behavioral of LCM_GCD is
 begin
 
     divider : lcm_divider port map (
+        clock => clk,
         denom => divider_denominator,
         numer => divider_numerator,
         quotient => divider_quotient,
@@ -77,6 +80,7 @@ begin
     );
 
     multiplier : lcm_multiplier port map (
+        clock => clk,
         dataa => multiplier_a,
         datab => multiplier_b,
         result => multiplier_product
@@ -175,6 +179,14 @@ process(state, v1_locked, v2_locked, gcd_v1, gcd_v2, gcd_d, multiplier_a, multip
         when S_DIVIDE =>
             next_state <= S_DIVIDE2;
         when S_DIVIDE2 =>
+            next_state <= S_DIVIDE3;
+        when S_DIVIDE3 => 
+            next_state <= S_DIVIDE4;
+        when S_DIVIDE4 =>
+            next_state <= S_DIVIDE5;
+        when S_DIVIDE5 =>
+            next_state <= S_DIVIDE6;
+        when S_DIVIDE6 =>
             next_multiplier_a <= divider_quotient;
             next_multiplier_b <= std_logic_vector(v2_locked);
             next_state <= S_MULTIPLY;
@@ -182,6 +194,8 @@ process(state, v1_locked, v2_locked, gcd_v1, gcd_v2, gcd_d, multiplier_a, multip
         when S_MULTIPLY =>
             next_state <= S_MULTIPLY2;
         when S_MULTIPLY2 =>
+            next_state <= S_MULTIPLY3;
+        when S_MULTIPLY3 =>
             next_vout_sig <= multiplier_product(DATA_WIDTH-1 downto 0);
             next_state <= S_DONE;
         --return the LCM to the DC FIFO
