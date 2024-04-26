@@ -200,6 +200,7 @@ begin
 
     process(state, instr_queue_out, instr_queue_empty, digit_empty, digit_top, signed_quotient, unsigned_quotient, signed_remainder, unsigned_remainder, numerator) is begin
         next_numerator <= numerator;
+        digit_in <= (others => '0');
         write_char <= '0';
         digit_pop <= '0';
         digit_push <= '0';

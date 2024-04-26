@@ -6,6 +6,7 @@ use work.dlxlib.all;
 entity dlx_execute is
     port (
         clk : in std_logic;
+        clk_50 : in std_logic;
         rst_l : in std_logic;
         execute_pc : in std_logic_vector(ADDR_WIDTH-1 downto 0);
         reg_in1 : in std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -26,7 +27,9 @@ entity dlx_execute is
         print_data : out std_logic_vector(DATA_WIDTH-1 downto 0);
         stopwatch_start : out std_logic := '0';
         stopwatch_stop : out std_logic := '0';
-        stopwatch_reset : out std_logic := '0'
+        stopwatch_reset : out std_logic := '0';
+        ex_stall : out std_logic := '0';
+        lcm_result : out std_logic_vector(DATA_WIDTH-1 downto 0)
     );
 end dlx_execute;
 
@@ -69,6 +72,19 @@ architecture hierarchial of dlx_execute is
         );
     end component mux2_1;
 
+    component lcm_accelerator is
+        port (
+            clk_10 : in std_logic;
+            clk_50 : in std_logic;
+            rst_l : in std_logic;
+            v1 : in std_logic_vector(DATA_WIDTH-1 downto 0);
+            v2 : in std_logic_vector(DATA_WIDTH-1 downto 0);
+            start : in std_logic;
+            result : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            done : out std_logic
+        );
+    end component;
+
     signal alu_result_sig : std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
 
     signal mux1_sel : std_logic;
@@ -87,6 +103,18 @@ architecture hierarchial of dlx_execute is
     signal reg2_ff : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal reg3_ff : std_logic_vector(DATA_WIDTH-1 downto 0);
 
+    signal ex_stall_sig : std_logic := '0';
+    signal after_ex_stall : std_logic := '0';
+    signal instruction_queue : std_logic_vector(INSTR_WIDTH-1 downto 0) := (others => '0');
+
+    signal lcm_result_sig : std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
+    signal lcm_start_sig : std_logic := '0';
+    signal lcm_done : std_logic := '0';
+
+    signal next_stopwatch_start : std_logic := '0';
+    signal next_stopwatch_stop : std_logic := '0';
+    signal next_stopwatch_reset : std_logic := '0';
+
 
 begin
 
@@ -94,6 +122,8 @@ begin
     print_data <= reg1_ff;
     op <= opcode(execute_instr);
     expanded_address <= "000000000000000000000000000000000000000000000000000000" & execute_pc;
+    ex_stall <= ex_stall_sig;
+    lcm_result <= lcm_result_sig;
 
     muxinput1_1 : MUX4_1
         generic map (
@@ -165,8 +195,20 @@ begin
             op => op,
             out1 => alu_result_sig
         );
+    
+    lcm_accelerator_inst : lcm_accelerator
+        port map (
+            clk_10 => clk,
+            clk_50 => clk_50,
+            rst_l => rst_l,
+            v1 => alu_in1,
+            v2 => alu_in2,
+            start => lcm_start_sig,
+            result => lcm_result_sig,
+            done => lcm_done
+        );
 
-    process(op) begin
+    process (op) begin
         -- handle execute mux selects
         if op_cmp(op, JAL) then
             mux1_sel <= '1';
@@ -176,15 +218,27 @@ begin
         mux2_sel <= is_immediate(op);
 
         --  handle timer peripheral
-        stopwatch_reset <= '0';
-        stopwatch_start <= '0';
-        stopwatch_stop <= '0';
+        next_stopwatch_reset <= '0';
+        next_stopwatch_start <= '0';
+        next_stopwatch_stop <= '0';
         if op_cmp(op, TCLR) then
-            stopwatch_reset <= '1';
+            next_stopwatch_reset <= '1';
         elsif op_cmp(op, TSRT) then
-            stopwatch_start <= '1';
+            next_stopwatch_start <= '1';
         elsif op_cmp(op, TSTP) then
-            stopwatch_stop <= '1';
+            next_stopwatch_stop <= '1';
+        end if;
+    end process;
+
+    process(op, instruction_queue, lcm_done) begin
+        lcm_start_sig <= '0';
+        if op_cmp(op, LCM) then
+            ex_stall_sig <= '1';
+            lcm_start_sig <= '1';
+        elsif op_cmp(opcode(instruction_queue), LCM) and lcm_done = '0' then
+            ex_stall_sig <= '1';
+        else
+            ex_stall_sig <= '0';
         end if;
     end process;
 
@@ -192,9 +246,28 @@ begin
     begin
         if (rst_l = '0') then
             memory_instr <= (others => '0');
+            reg3_out <= (others => '0');
+            instruction_queue <= (others => '0');
         elsif (rising_edge(clk)) then
-            memory_instr <= execute_instr;
-            reg3_out <= reg3_ff;            
+            reg3_out <= reg3_ff;
+            stopwatch_start <= next_stopwatch_start;
+            stopwatch_stop <= next_stopwatch_stop;
+            stopwatch_reset <= next_stopwatch_reset;
+            if (ex_stall_sig = '1') then
+                if instruction_queue = X"0000000000000000" then
+                    instruction_queue <= execute_instr;
+                else
+                    instruction_queue <= instruction_queue;
+                end if;
+                memory_instr <= (others => '0');
+                after_ex_stall <= '1';
+            elsif after_ex_stall = '1' then
+                memory_instr <= instruction_queue;
+                instruction_queue <= X"0000000000000000";
+                after_ex_stall <= '0';
+            else
+                memory_instr <= execute_instr;
+            end if;         
         end if;
     end process;
 

@@ -22,7 +22,7 @@ begin
 
     result <=  result_sig;
 
-    process(addr, offset, bubble) begin
+    process(addr, offset, bubble, result_sig) begin
         if bubble = '0' then
             result_sig <= addr + offset;
         else

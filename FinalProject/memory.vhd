@@ -12,7 +12,8 @@ entity dlx_memory is
         instr_in : in std_logic_vector(INSTR_WIDTH-1 downto 0);
         data_mem_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
         instr_out : out std_logic_vector(INSTR_WIDTH-1 downto 0);
-        alu_result_out : out std_logic_vector(DATA_WIDTH-1 downto 0)
+        alu_result_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        lcm_result : in std_logic_vector(DATA_WIDTH-1 downto 0)
     );
 end dlx_memory;
 
@@ -48,7 +49,11 @@ begin
             instr_out <= (others => '0');
             alu_result_out <= (others => '0');
         elsif rising_edge(clk) then
-            alu_result_out <= alu_result_in;
+            if op_cmp(opcode(instr_in), LCM) then
+                alu_result_out <= lcm_result;
+            else
+                alu_result_out <= alu_result_in;
+            end if;
             instr_out <= instr_in;
         end if;
     end process;

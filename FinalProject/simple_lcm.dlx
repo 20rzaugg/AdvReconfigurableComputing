@@ -1,14 +1,12 @@
 .data
     inputs 12 0 0 0 0 0 0 0 0 0 0 0 0
-    intermediates 6 0 0 0 0 0 0
-    finals 3 0 0 0
     result 1 0
 .const
     s1 83 "\n\rWelcome to the DLX LCM Calculator!\n\rPlease enter 12 numbers separated by spaces: "
-    s2 23 "\n\rThe computed LCM is: "
+    s2 8 "\n\rLCM = "
 .text
     ; print string s1
-    ADDI R1, R0, s1
+    ADDI R15, R0, s1
     JAL printstring
     ADDI R1, R0, 0
 inputloop
@@ -39,79 +37,89 @@ sortloopdone
 inputloopdone
     TCLR
     TSRT
-    ADDI R12, R0, 0
-    ADDI R13, R0, 11
-    ; Compute the LCM of the first 6 pairs
-intermediatesloop
-    SEQI R10, R12, 6
-    BNEZ R10, intermediatesloopdone
-    LW R1, inputs(R12)
-    LW R2, inputs(R13)
-    JAL lcmfunc
-    SW intermediates(R12), R3
-    ADDI R12, R12, 1
-    SUBI R13, R13, 1
-    J intermediatesloop
-intermediatesloopdone
-    ADDI R12, R0, 0
-    ADDI R13, R0, 5
-    ; Compute the LCM of the next 3 pairs
-finalsloop
-    SEQI R10, R12, 3
-    BNEZ R10, finalsloopdone
-    LW R1, intermediates(R12)
-    LW R2, intermediates(R13)
-    JAL lcmfunc
-    SW finals(R12), R3 
-    ADDI R12, R12, 1
-    SUBI R13, R13, 1
-    J finalsloop
-finalsloopdone
-    ADDI R12, R0, 2
-    LW R1, finals(R0)
-    LW R2, finals(R12)
-    JAL lcmfunc
-    ADDI R1, R3, 0
-    ADDI R12, R0, 1
-    LW R2, finals(R12)
-    JAL lcmfunc
-    SW result(R0), R3
+    ; Load inputs into registers
+    ADDI R13, R0, 0
+    LW R1 inputs(R13)
+    ADDI R13, R13, 1
+    LW R2 inputs(R13)
+    ADDI R13, R13, 1
+    LW R3 inputs(R13)
+    ADDI R13, R13, 1
+    LW R4 inputs(R13)
+    ADDI R13, R13, 1
+    LW R5 inputs(R13)
+    ADDI R13, R13, 1
+    LW R6 inputs(R13)
+    ADDI R13, R13, 1
+    LW R7 inputs(R13)
+    ADDI R13, R13, 1
+    LW R8 inputs(R13)
+    ADDI R13, R13, 1
+    LW R9 inputs(R13)
+    ADDI R13, R13, 1
+    LW R10 inputs(R13)
+    ADDI R13, R13, 1
+    LW R11 inputs(R13)
+    ADDI R13, R13, 1
+    LW R12 inputs(R13)
+
+    ; -- initial
+    LCM R1, R1, R12
+    NOOP
+
+    LCM R2, R2, R11
+    NOOP
+
+    LCM R3, R3, R10
+    NOOP
+
+    LCM R4, R4, R9
+    NOOP
+
+    LCM R5, R5, R8
+    NOOP
+
+    LCM R6, R6, R7
+    NOOP
+    NOOP
+
+    ; -- intermediates
+    LCM R1, R1, R6
+    NOOP
+
+    LCM R2, R2, R5
+    NOOP
+
+    LCM R3, R3, R4
+    NOOP
+
+    ; -- final 2
+    LCM R1, R1, R2
+    NOOP
+    NOOP
+
+    LCM R3, R1, R3
+    NOOP
+    NOOP
+
     J exit
 
-; assumes input R1, R2 outputs to R3
-lcmfunc
-    ADDI R3, R1, 0
-    ADDI R4, R2, 0
-lcmfuncloop
-    SEQ R10, R3, R4
-    BNEZ R10, lcmfuncloopdone
-    SGTU R10, R3, R4
-    BEQZ R10, lcmfuncelse
-    ADD R4, R4, R2
-    J lcmfuncloop
-lcmfuncelse
-    ADD R3, R3, R1
-    J lcmfuncloop
-lcmfuncloopdone
-    JR R63
-
-; assumes input pointer is R1 and string is '\0' terminated 
+; assumes input pointer is R15 and string is '\0' terminated 
 printstring
-    ADDI R3, R0, 0
+    ADDI R17, R0, 0
 printloop
-	LWP R2, R1(R3)
-	BEQZ R2 doneprinting
-	PCH R2
-	ADDI R3, R3, 1
+	LWP R16, R15(R17)
+	BEQZ R16 doneprinting
+	PCH R16
+	ADDI R17, R17, 1
 	J printloop
 doneprinting
 	JR R63
 
 exit
-    ADDI R1, R0, s2
+    ADDI R15, R0, s2
     JAL printstring
-    LW R1, result(R0)
-    PDU R1
+    PDU R3
     TSTP
 done
     J done

@@ -23,9 +23,19 @@ entity dlx_processor is
 end dlx_processor;
 
 architecture behavioral of dlx_processor is
+    
+    component pll2 is
+        port (
+            areset : in std_logic := '0';
+            inclk0 : in std_logic := '0';
+            c0 : out std_logic
+        );
+    end component;
+
     component DLXpipeline is
         port (
             clk : in std_logic;
+            clk_50 : in std_logic;
             rst_l : in std_logic;
             tx : out std_logic;
             rx : in std_logic;
@@ -38,12 +48,25 @@ architecture behavioral of dlx_processor is
             HEX5 : out unsigned(7 downto 0)
         );
     end component;
+
+    signal clk_100 : std_logic;
+    signal areset : std_logic;
+
 begin
+
+    areset <= not KEY(0);
+
+    pll2_inst : pll2
+        port map (
+            areset => areset,
+            inclk0 => MAX10_CLK1_50,
+            c0 => clk_100
+        );
 
     pipeline : DLXpipeline
         port map (
-            --clk => MAX10_CLK1_50,
             clk => ADC_CLK_10,
+            clk_50 => clk_100,
             rst_l => KEY(0),
             tx => TX,
             rx => RX,

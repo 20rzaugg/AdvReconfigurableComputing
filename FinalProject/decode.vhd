@@ -26,7 +26,8 @@ entity dlx_decode is
         data_hazard2 : out STD_LOGIC_VECTOR (1 downto 0);
         data_hazard3 : out STD_LOGIC_VECTOR (1 downto 0);
         print_queue_full : in STD_LOGIC;
-        input_buffer_empty : in STD_LOGIC
+        input_buffer_empty : in STD_LOGIC;
+        ex_stall : in STD_LOGIC
     );
 end dlx_decode;
 
@@ -162,8 +163,9 @@ begin
         end if;
     end process;
 
-    process(decode_instr, execute_instr, memory_instr, rs1, rs2, print_queue_full, input_buffer_empty, op, instr_queue, branch_taken) begin
+    process(decode_instr, execute_instr, memory_instr, rs1, rs2, rs3, print_queue_full, input_buffer_empty, op, instr_queue, branch_taken, ex_stall) begin
         bubble <= '0';
+        next_data_hazard1 <= NO_HAZARD;
         -- check for data hazards in src1
         if rs1 = regdest(execute_instr) and (op_cmp(opcode(execute_instr), LW) or op_cmp(opcode(execute_instr), GD)) then
             bubble <= '1';
@@ -180,6 +182,7 @@ begin
         -- check for data hazards in src2
         if rs2 = regdest(execute_instr) and (op_cmp(opcode(execute_instr), LW) or op_cmp(opcode(execute_instr), GD)) then
             bubble <= '1';
+            next_data_hazard2 <= NO_HAZARD;
         elsif rs2 = regdest(execute_instr) and has_writeback(opcode(execute_instr)) = '1' then
             next_data_hazard2 <= RBW_EXMEM;
         elsif rs2 = regdest(memory_instr) and op_cmp(opcode(memory_instr), LW) then
@@ -193,6 +196,7 @@ begin
         -- check for data hazards in src3
         if rs3 = regdest(execute_instr) and (op_cmp(opcode(execute_instr), LW) or op_cmp(opcode(execute_instr), GD)) then
             bubble <= '1';
+            next_data_hazard3 <= NO_HAZARD;
         elsif rs3 = regdest(execute_instr) and has_writeback(opcode(execute_instr)) = '1' then
             next_data_hazard3 <= RBW_EXMEM;
         elsif rs3 = regdest(memory_instr) and op_cmp(opcode(memory_instr), LW) then
@@ -205,6 +209,10 @@ begin
 
         -- handle "print buffer full" and "scan buffer empty"
         if branch_taken = '0' and ((input_buffer_empty = '1' and (op_cmp(op, GD) or op_cmp(opcode(instr_queue), GD))) or (print_queue_full = '1' and (op_cmp(op, PD) or op_cmp(op, PCH)))) then
+            bubble <= '1';
+        end if;
+
+        if ex_stall = '1' then
             bubble <= '1';
         end if;
         
